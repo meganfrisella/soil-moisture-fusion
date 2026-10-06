@@ -1,0 +1,13 @@
+[workspace]
+authors = ["meganfrisella <meganfrisella@gmail.com>"]
+channels = ["conda-forge"]
+name = "soil-moisture-fusion"
+platforms = ["osx-arm64"]
+version = "0.1.0"
+
+[tasks]
+
+[dependencies]
+pandas = ">=3.0.6,<4"
+matplotlib = ">=3.11.2,<4"
+numpy = ">=2.5.3,<3"
