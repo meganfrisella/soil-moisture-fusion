@@ -29,3 +29,12 @@ MANIFEST
 # pixi environments
 .pixi/*
 !.pixi/config.toml
+
+.DS_Store
+
+# Original NISAR products downloaded locally.
+/data/nisar/
+
+# Native seismic and AgriMet observations downloaded locally.
+/data/seismic/
+/data/soil_moisture/
