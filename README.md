@@ -22,10 +22,10 @@ pixi shell
 
 ## Odessa data sources map
 
-Interactive map of seismometers, soil moisture stations, and NISAR footprints around Odessa, WA.
+[Interactive map](https://meganfrisella.github.io/soil-moisture-fusion/) of seismometers, soil moisture stations, and NISAR footprints around Odessa, WA.
 Map inputs live in `data/station_map.json`; the generated HTML and PNG live in `outputs/`.
 
-[![Odessa station and NISAR footprint map](outputs/station_map.png)](outputs/station_map.html)
+[![Odessa station and NISAR footprint map](outputs/station_map.png)](https://meganfrisella.github.io/soil-moisture-fusion/)
 
 ## Related work
 
