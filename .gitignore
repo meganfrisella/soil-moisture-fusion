@@ -36,5 +36,5 @@ MANIFEST
 /data/nisar/
 
 # Native seismic and AgriMet observations downloaded locally.
-/data/seismic/
-/data/soil_moisture/
+/exploration/
+/data/nisar/

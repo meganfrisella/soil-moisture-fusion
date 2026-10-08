@@ -1,8 +1,60 @@
 # Literature review
 
-Summaries of the works listed in the README. Each entry covers the research question, data, code, methodology, evaluation, and results.
+## Lal et al. (2024)
 
-**Access status:** Full text was available for all six papers, including the supplied [Chao PDF](chao.pdf); GAIA is project documentation. “No repository identified” means none was identified in the reviewed article, not that no code exists.
+[“Uncertainty estimates in the NISAR high-resolution soil moisture retrievals from multi-scale algorithm”](https://doi.org/10.1016/j.rse.2024.114288), *Remote Sensing of Environment*, 311, 114288. [Publisher abstract](https://www.sciencedirect.com/science/article/pii/S0034425724003067); [manuscript sections](https://www.sciencedirect.com/science/article/am/pii/S0034425724003067).
+
+### Research question
+
+How can the NISAR multi-scale retrieval algorithm estimate spatially and temporally varying soil-moisture uncertainty where ground measurements are sparse?
+
+### Data sources
+
+Fourteen UAVSAR scenes from SMAPVEX-12, June–July 2012, over agricultural fields near Carman, Manitoba, simulated to approximate NISAR characteristics; campaign soil-moisture measurements provide reference data. The algorithm disaggregates coarse ERA5-Land moisture using L-band backscatter.
+
+### Code repository
+
+No repository identified in the reviewed material or targeted title/DOI search.
+
+### Technical methodology
+
+Analytical variance propagation separates errors in coarse moisture and SAR backscatter from uncertainty in retrieval parameters. Sensitivity experiments examine each contribution; the input-error derivation assumes independence between SAR observations and coarse moisture.
+
+### Evaluation techniques
+
+Crop-wise root-mean-square predicted uncertainty is compared with retrieval ubRMSE against campaign measurements.
+
+### Results
+
+Coarse-input moisture error is a major uncertainty source. Predicted uncertainty generally exceeds observed ubRMSE across the tested crops; both remain below the mission's 0.06 m³/m³ goal in this experiment. This is a prelaunch airborne-data demonstration. [Manuscript results](https://www.sciencedirect.com/science/article/am/pii/S0034425724003067).
+
+## Pachepsky and Hill (2017)
+
+[“Scale and scaling in soils”](https://doi.org/10.1016/j.geoderma.2016.08.017), *Geoderma*, 287, 4–30. [Publisher abstract and section excerpts](https://www.sciencedirect.com/science/article/pii/S0016706116303640); [USDA publication record and summary](https://www.ars.usda.gov/research/publications/publication/?seqNo115=325208).
+
+### Research question
+
+How can soil information measured at one spatial or temporal scale inform understanding and decisions at another? This review organizes scaling concepts and methods across soil science. [USDA summary](https://www.ars.usda.gov/research/publications/publication/?seqNo115=325208).
+
+### Data sources
+
+A synthesis of published soil studies covering pore geometry, soil water, transport, and soil-property relationships. The accessible material describes a methodological review rather than a new observational dataset.
+
+### Code repository
+
+No repository identified in the accessible abstract, section excerpts, or USDA record; the full article was not available for checking software references.
+
+### Technical methodology
+
+The review covers dimensional analysis, power laws, spatial and temporal scaling, and upscaling through changes in measurement support. Approaches for spatiotemporal patterns include empirical orthogonal functions, data assimilation, distribution matching, and temporal stability. Soil-specific topics include Richards-equation scaling and scale-dependent hydraulic parameters and pedotransfer functions. [Publisher overview](https://www.sciencedirect.com/science/article/pii/S0016706116303640).
+
+### Evaluation techniques
+
+The accessible material compares concepts and applications from prior studies. It does not provide enough detail to summarize individual validation protocols or quantitative performance.
+
+### Results
+
+The contribution is a conceptual framework and research outlook for transferring soil information across scales. [USDA summary](https://www.ars.usda.gov/research/publications/publication/?seqNo115=325208).
 
 ## Yu et al. (2025)
 
@@ -217,6 +269,38 @@ The [evaluation chapter](https://gaia-hazlab.github.io/gwl-space-time-smooth/twi
 The repository produces evolving 90 m fields and uncertainty budgets. It reports domain-mean moisture correlation around 0.94 against another field sharing its forcing, explicitly interpreted as a consistency check. Sensitivity and observability diagnostics illustrate the complementary contributions of ground and seismic networks.
 
 The 90 m output spacing is a representation choice; actual resolving power depends on observation footprints and priors. A fully cycling storage-based assimilation system remains a stated development target, so the documentation should be read as a combination of implemented methods, demonstrations, and proposed extensions.
+
+**Role in this project:** Integrate NISAR SME2 surface soil moisture, including propagated surface-to-root-zone conversion and propagated uncertainties, into GAIA HazLab's soil-state model.
+
+## Denolle Lab — codameter
+
+[codameter](https://github.com/Denolle-Lab/codameter), research software for measuring and interpreting relative seismic velocity change with propagated uncertainties. The repository identifies its companion framework manuscript as in preparation.
+
+### Research question
+
+How can uncertainty in dv/v measurements, including sensitivity to processing choices, be quantified and propagated into physical interpretations of subsurface change?
+
+### Data sources
+
+The interpretation workflow accepts dv/v time series, measurement errors, environmental forcings, and site information. Examples include synthetic data and a loader for the [Clements and Denolle (2023) California dataset](https://doi.org/10.5281/zenodo.6413275). The repository also generates synthetic correlation functions with known imposed dv/v for measurement testing. [Documentation](https://github.com/Denolle-Lab/codameter#readme).
+
+### Code repository
+
+[Denolle-Lab/codameter](https://github.com/Denolle-Lab/codameter). The [measurement uncertainty module](https://github.com/Denolle-Lab/codameter/blob/master/src/codameter/uq_measurement.py) provides coherence-based error estimates, processing ensembles, temporal error covariance, and reference-related uncertainty calculations.
+
+### Technical methodology
+
+The measurement module combines uncertainty within each processing configuration with variability across configurations. It represents dependence from overlapping stacks and shared references through measurement covariance, rather than only independent error bars. Reference inversion also supports estimating a relative dv/v series from pairwise measurements. These are implemented uncertainty models; their adequacy depends on the chosen ensemble and covariance assumptions. [Source code](https://github.com/Denolle-Lab/codameter/blob/master/src/codameter/uq_measurement.py).
+
+### Evaluation techniques
+
+Seeded synthetic correlation datasets impose known velocity changes and vary noise, waveform decorrelation, and frequency-dependent structure. Recovery against known truth tests processing sensitivity and supports regression checks. [Synthetic dataset generator](https://github.com/Denolle-Lab/codameter/blob/master/src/codameter/golden.py).
+
+### Results
+
+The reviewed code provides dv/v ensemble means, standard deviations, and covariance calculations suitable for probabilistic downstream inference. This review did not run the package or establish calibration on Odessa observations.
+
+**Role in this project:** Codameter will supply the dv/v input with uncertainties to GAIA HazLab's soil-state model.
 
 ## Bensen et al. (2007)
 
