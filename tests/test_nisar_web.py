@@ -20,8 +20,8 @@ from nisar import geometry
 from nisar import observations as sme2
 from nisar import catalog
 import visualize_nisar_sme2 as workflow
-from nisar_visualization import workflow as frames_workflow
-from nisar_visualization.workflow import frame_tracks
+from nisar import selection as frames_workflow
+from maps.nisar_footprints import frame_tracks
 from maps.nisar_footprints import contributing_tracks
 from maps.common import read_manifest, BASEMAP_TILES
 from nisar_visualization.style import color_maps

@@ -73,8 +73,9 @@ from maps.common import bounds_label
 from nisar_visualization.gif import render_gif
 from nisar_visualization.topographic import render_topographic
 from nisar_visualization.web import render_html
-from nisar_visualization.workflow import (DEFAULT_COMBINE_WINDOW, prepare_frames, frame_tracks,
-                                          validate_combine_window)
+from nisar.selection import (DEFAULT_COMBINE_WINDOW, DEFAULT_MIN_NUMERIC_PERCENT,
+                             prepare_frames, validate_combine_window)
+from maps.nisar_footprints import frame_tracks
 from nisar.quality import qualifies
 from nisar_visualization.style import DEFAULT_LIMITS
 from utils.download_stats import DownloadStats
@@ -92,7 +93,7 @@ def parser():
     p.add_argument('--formats', nargs='+', choices=('gif', 'png', 'html'), default=['gif', 'png'],
                    help='Outputs to generate; HTML always uses a sibling assets folder')
     p.add_argument('--title', default='NISAR SME2 viewing box')
-    p.add_argument('--min-numeric-percent', type=float, default=50)
+    p.add_argument('--min-numeric-percent', type=float, default=DEFAULT_MIN_NUMERIC_PERCENT)
     p.add_argument('--nisar-combine-window', type=float, default=DEFAULT_COMBINE_WINDOW,
                    metavar='MINUTES', help='Maximum same-track acquisition-start span in minutes '
                    '(default: 10; 0 disables combining); applied before coverage filtering')

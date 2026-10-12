@@ -1,11 +1,8 @@
 # Scripts
 
-Run scripts from the repository root with `pixi run python scripts/<name>.py`.
-Downloader stations, dates, and destinations are configured with constants; dates are inclusive UTC days.
+Run from the repository root with `pixi run python scripts/<name>.py --output-dir DIR`.
 
-- [build_station_map.py](build_station_map.py): Builds the Odessa station and NISAR footprint HTML map from `data/station_map.json`. Use `--refresh` to update the snapshot from public catalogs.
-- [pull_nisar_sme2.py](pull_nisar_sme2.py): Downloads checksum-verified native SME2 HDF5 products to `data/nisar/` using exported `EARTHDATA_USER` and `EARTHDATA_PASS`. Use `--list-only` to query and list catalog matches without saving files or authenticating.
-
-The seismic downloader, raw data, correlation inspection workflows, designs, tests, and figures are retained under [exploration/](../exploration/README.md). Future dv/v processing and uncertainty estimation are delegated to codameter.
-
-The [ODSW soil-moisture downloader](../exploration/scripts/pull_soil_moisture.py), CSV data, provenance and tests are also retained under `exploration/`.
+- [build_gaia_map.py](build_gaia_map.py): Builds the GAIA HTML map and PNG preview with one convex hull per NISAR track across overlapping frames (preview requires Chrome/Chromium and internet).
+- [pull_nisar_sme2.py](pull_nisar_sme2.py): Downloads checksum-verified SME2 granules for configured tracks and UTC dates into `data/nisar/`.
+- [visualize_nisar_sme2.py](visualize_nisar_sme2.py): Generates bounding-box SME2 GIF/PNG/HTML visuals with configurable numeric coverage, same-track combining, and red outlines for odd candidate flags.
+- [summarize_nisar_sme2.py](summarize_nisar_sme2.py): Reports area, intersecting native cells, source granules/combined frames, UTC dates/span, and mean candidate coverage using the same filtering and combining as the visualizer (defaults: 50%, 10 minutes).

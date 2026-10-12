@@ -122,3 +122,10 @@ def tracks_from_items(items, donors):
             polygon for shape in group.pop('footprints') for polygon in shape['coordinates']]}
         tracks.append(group)
     return tracks
+
+
+def frame_tracks(granules, frames):
+    """Build station-map-compatible metadata using only retained granules."""
+    donors = {source['granule'].removesuffix('.h5'): source
+              for record in frames.records for source in record['metadata']['source_granules']}
+    return tracks_from_items([g.catalog_item for g in granules if g.name.removesuffix('.h5') in donors], donors)

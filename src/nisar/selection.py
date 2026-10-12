@@ -1,8 +1,8 @@
-"""Shared catalog, verified cache and coverage selection for SME2 visual formats.
+"""Shared verified ingestion, native mosaicking and selection for SME2 analysis.
 
-Every output receives the same native EPSG:6933 window and qualifying granules.
+Summaries and visuals receive the same native EPSG:6933 window and acquisition groups.
 Acquisition dates are UTC; coverage ignores flags and uncertainties.
-Run through ``pixi run python scripts/visualize_nisar_sme2.py --help``.
+Partial edge cells count equally; cells outside a granule remain missing.
 """
 
 from datetime import datetime, timezone
@@ -12,12 +12,11 @@ import h5py
 import numpy as np
 
 from nisar.quality import ALGORITHMS, coverage_counts, qualifies
-from maps.nisar_footprints import tracks_from_items
-
 from nisar.discovery import ensure_granules
 from nisar.observations import native, read_frame, window_layout
 
 DEFAULT_COMBINE_WINDOW = 10
+DEFAULT_MIN_NUMERIC_PERCENT = 50
 
 
 def validate_combine_window(minutes):
@@ -114,7 +113,7 @@ def prepare_frames(view, granules, data_dir, minimum_percent, provenance, stats=
           f'{layout["mask"].sum():,} native cells '
           f'in the full box; >{minimum_percent:g}% numeric in at least one algorithm.', flush=True)
     if not frames:
-        raise ValueError('No acquisition groups pass the numeric coverage threshold; no visuals written')
+        raise ValueError('No acquisition groups pass the numeric coverage threshold; no outputs written')
     retained = {path.name for record in frames.records for path in record['paths']}
     provenance = dict(provenance, min_numeric_percent=minimum_percent,
                       nisar_combine_window_minutes=combine_window,
@@ -129,17 +128,10 @@ def prepare_frames(view, granules, data_dir, minimum_percent, provenance, stats=
     return layout, frames, provenance
 
 
-def frame_tracks(granules, frames):
-    """Build station-map-compatible metadata using only retained granules."""
-    donors = {source['granule'].removesuffix('.h5'): source
-              for record in frames.records for source in record['metadata']['source_granules']}
-    return tracks_from_items([g.catalog_item for g in granules if g.name.removesuffix('.h5') in donors], donors)
-
-
 class GranuleFrames:
     """Scan coverage once, then load retained frames lazily to bound array memory."""
 
-    def __init__(self, paths, layout, minimum_percent=50, combine_window=DEFAULT_COMBINE_WINDOW):
+    def __init__(self, paths, layout, minimum_percent=DEFAULT_MIN_NUMERIC_PERCENT, combine_window=DEFAULT_COMBINE_WINDOW):
         self.layout = layout
         self.records = []
         total = int(layout['mask'].sum())

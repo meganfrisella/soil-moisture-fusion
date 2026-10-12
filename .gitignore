@@ -36,5 +36,10 @@ MANIFEST
 /data/nisar/
 
 # Native seismic and AgriMet observations downloaded locally.
-/exploration/
+/exploration
+!/exploration/*.py
+!/exploration/README.md
+!/exploration/data/
+/exploration/data/*
+!/exploration/data/README.md
 /data/nisar/

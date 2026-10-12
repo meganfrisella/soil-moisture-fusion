@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="en" data-map-ready="false">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GAIA · Source stations and NISAR footprints</title>
+  <link rel="stylesheet" href="__LEAFLET_CSS__"
+        integrity="__LEAFLET_CSS_INTEGRITY__" crossorigin="">
+  <style>
+    :root { color-scheme: light; font: 13px/1.45 system-ui, sans-serif; color: #263a36; background: #fff; }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    main { display: grid; grid-template-columns: minmax(0, 1fr) 235px; }
+    #map { height: 100vh; min-height: 500px; background: #e5ebdd; }
+    #legend { padding: 15px; border-left: 1px solid #ddd; overflow: auto; max-height: 100vh; }
+    .legend-row { display: flex; align-items: center; gap: 9px; margin: 0 0 10px; font-size: 12px; }
+    .legend-row { cursor: pointer; }
+    .legend-row.active, .legend-row:focus-visible { font-weight: 800; background: #edf2ee; outline: 2px solid #c8d5cf; outline-offset: 3px; }
+    .legend-row.active .swatch { border-top-width: 5px; }
+    .legend-symbol { width: 24px; flex-shrink: 0; text-align: center; }
+    .swatch { display: inline-block; width: 24px; border-top: 2px dashed; }
+    .swatch.track-swatch { border-top: 3px solid; }
+    a { color: #126d70; text-underline-offset: 3px; }
+    .eyebrow { font-size: 10px; letter-spacing: .1em; font-weight: 700; text-transform: uppercase; color: #5d756c; }
+    .marker { background: transparent; border: none; }
+    .seismic-symbol { display: block; color: #253e76; font-size: 23px; line-height: 23px; text-shadow: 0 0 2px white, 0 0 2px white; }
+    .soil-symbol { display: block; width: 14px; height: 14px; margin: 5px; border-radius: 50%; background: #147e78; border: 2px solid white; box-shadow: 0 1px 4px #25443888; }
+    .marker.active > span { transform: scale(1.3); filter: drop-shadow(0 0 3px #fff); }
+    #hover-card { position: fixed; z-index: 800; background: #fff; border: 1px solid #c8d5cf; border-radius: 6px; box-shadow: 0 6px 22px #18383030; width: 310px; max-width: calc(100% - 24px); max-height: calc(100vh - 24px); overflow: auto; padding: 17px; font: 12px/1.45 system-ui, sans-serif; }
+    .close-card { float: right; border: 0; background: transparent; font-size: 21px; line-height: 1; color: #536761; cursor: pointer; padding: 0 0 6px 6px; }
+    .card-hint { display: block; margin-bottom: 7px; color: #667a71; font-size: 10px; }
+    #hover-card[hidden] { display: none; }
+    #hover-card h2 { margin: 2px 0 3px; font-size: 18px; line-height: 1.25; }
+    #hover-card h3 { font-size: 13px; margin: 14px 0 4px; }
+    #hover-card p { margin: 5px 0 10px; color: #536761; }
+    #hover-card dl { display: grid; grid-template-columns: 95px 1fr; gap: 6px 9px; margin: 12px 0; }
+    #hover-card dt { color: #667a71; }
+    #hover-card dd { margin: 0; overflow-wrap: anywhere; }
+    #hover-card nav { display: flex; flex-wrap: wrap; gap: 7px 12px; font-size: 11px; }
+    #hover-card section + section { border-top: 1px solid #dce3db; padding-top: 13px; margin-top: 17px; }
+    #status { position: absolute; bottom: 32px; left: 12px; z-index: 700; max-width: 390px; background: white; padding: 10px; border-radius: 4px; }
+    .map-wrap { position: relative; min-width: 0; }
+    @media (max-width: 650px) {
+      main { grid-template-columns: 1fr; }
+      #map { height: 75vh; min-height: 400px; }
+      #legend { max-height: none; border-left: none; display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
+      #hover-card { max-height: 42vh; }
+    }
+    .well-symbol { display:block; width:6px; height:6px; margin:5px; border-radius:50%; background:#826946; border:1px solid #ffffffdd; }
+    .snow-symbol { display:block; color:#3185a4; font-size:19px; text-shadow:0 0 2px white; }
+    .stream-symbol { display:block; color:#186ca4; font-size:19px; text-shadow:0 0 2px white; }
+    .legend-note { color:#5d756c; font-size:11px; margin-top:16px; }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="map-wrap">
+      <div id="map" aria-label="GAIA domain, source stations and NISAR footprints"></div>
+      <article id="hover-card" hidden aria-live="polite" aria-label="Feature metadata"></article>
+      <div id="status" hidden role="status"></div>
+    </div>
+    <aside id="legend" aria-label="Map legend"></aside>
+  </main>
+  <noscript>This interactive map requires JavaScript. Station metadata is also saved in the embedded map metadata.</noscript>
+  <script id="map-data" type="application/json">__MAP_DATA__</script>
+  <script src="__LEAFLET_JS__"
+          integrity="__LEAFLET_JS_INTEGRITY__" crossorigin=""></script>
+  <script>
+    "use strict";
+    const data = JSON.parse(document.getElementById("map-data").textContent);
+    const escapeHtml = value => String(value ?? "Not supplied").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+    const link = ([label, address]) => `<a href="${escapeHtml(address)}" target="_blank" rel="noopener noreferrer">${escapeHtml(label)}</a>`;
+    const rows = values => `<dl>${values.map(([k, v]) => `<dt>${escapeHtml(k)}</dt><dd>${escapeHtml(v)}</dd>`).join("")}</dl>`;
+    const coords = (lat, lon) => `${Number(lat).toFixed(5)}°, ${Number(lon).toFixed(5)}°`;
+    const colors = ["#af671c", "#7d54a6", "#bc4b63", "#3185a4", "#6d8428", "#237e81"];
+    const tracks = data.track_hulls || [];
+    const sourceFrames = (data.tracks || []).filter(frame =>
+      tracks.some(track => track.track === frame.track && track.frames.includes(frame.frame)));
+    const acquisitionDates = sourceFrames.flatMap(frame=>frame.granules).map(g=>g.start.slice(0,10)).sort();
+    const trackNumbers = [...new Set(tracks.map(t => t.track))];
+    const trackColor = t => colors[trackNumbers.indexOf(t.track) % colors.length];
+    const card = document.getElementById('hover-card');
+    const status = document.getElementById('status');
+    const kinds = {
+      seismic: {label:'Seismic · UW / CC', symbol:'▲', color:'#253e76', className:'seismic-symbol'},
+      soil: {label:'Soil moisture', symbol:'●', color:'#147e78', className:'soil-symbol'},
+      snow: {label:'SNOTEL · snow only', symbol:'◆', color:'#3185a4', className:'snow-symbol'},
+      streamflow: {label:'USGS · stream gauges', symbol:'▼', color:'#186ca4', className:'stream-symbol'},
+      groundwater: {label:'USGS · groundwater wells', symbol:'●', color:'#826946', className:'well-symbol'}
+    };
+    let cardKey = '';
+    let cardPinned = false;
+    function hideCard() { card.hidden = true; cardKey = ''; cardPinned = false; }
+    function hideHoverCard(key) {
+      if (!cardPinned && (key === undefined || key === cardKey)) hideCard();
+    }
+    function positionCard(event, anchor) {
+      if (cardPinned) return;
+      const pointer = event?.originalEvent || event;
+      const rect = anchor?.getBoundingClientRect();
+      const keyboardClick = pointer?.type === 'click' && pointer.detail === 0;
+      const x = !keyboardClick && Number.isFinite(pointer?.clientX) ? pointer.clientX : (rect?.right || 12);
+      const y = !keyboardClick && Number.isFinite(pointer?.clientY) ? pointer.clientY : (rect?.top || 12);
+      const width = card.offsetWidth, height = card.offsetHeight, gap = 14, margin = 12;
+      const left = x + gap + width <= innerWidth - margin ? x + gap : x - gap - width;
+      const top = y + gap + height <= innerHeight - margin ? y + gap : y - gap - height;
+      card.style.left = Math.max(margin, Math.min(left, innerWidth - width - margin)) + 'px';
+      card.style.top = Math.max(margin, Math.min(top, innerHeight - height - margin)) + 'px';
+    }
+    function showCard(key, html, event, anchor) {
+      const pin = event?.type === 'click' || event?.type === 'keydown';
+      if (cardPinned && (!pin || key === cardKey)) return;
+      cardPinned = false;
+      if (key !== cardKey || card.hidden) {
+        cardKey = key;
+        card.innerHTML = '<button class="close-card" aria-label="Close metadata card">×</button><small class="card-hint"></small>' + html;
+        card.querySelector('.close-card').onclick = hideCard;
+        card.hidden = false;
+        card.scrollTop = 0;
+      }
+      positionCard(event, anchor);
+      cardPinned = pin;
+      card.querySelector('.card-hint').textContent = pin ? 'Pinned · × to close' : 'Click the feature to pin this card';
+    }
+    window.addEventListener('resize', () => {
+      if (!cardPinned) { hideHoverCard(); return; }
+      const rect = card.getBoundingClientRect();
+      card.style.left = Math.max(12, Math.min(rect.left, innerWidth - rect.width - 12)) + 'px';
+      card.style.top = Math.max(12, Math.min(rect.top, innerHeight - rect.height - 12)) + 'px';
+    });
+    function trackCard(track) {
+      const granules = [...new Map(sourceFrames
+        .filter(frame => frame.track === track.track && track.frames.includes(frame.frame))
+        .flatMap(frame => frame.granules).map(g => [g.id, g])).values()]
+        .sort((a,b) => a.start.localeCompare(b.start) || a.id.localeCompare(b.id));
+      const vertices = track.geometry.coordinates.flat(2);
+      const lats = vertices.map(p => p[1]), lons = vertices.map(p => p[0]);
+      const latest = granules[granules.length - 1];
+      const collections = [...new Set(granules.map(g => g.collection))];
+      const polarizations = [...new Set(granules.flatMap(g => g.polarization))];
+      return `<section><div class="eyebrow" style="color:${trackColor(track)}">NISAR · Level 3 SME2</div>
+        <h2>Track ${String(track.track).padStart(3,"0")}</h2>
+        ${rows([["Direction", track.direction], ["Overlapping frames", track.frames.map(f=>String(f).padStart(3,"0")).join(", ")],
+          ["WGS84 SW / NE", coords(Math.min(...lats), Math.min(...lons)) + " / " + coords(Math.max(...lats), Math.max(...lons))],
+          ["Grid spacing", "200 m · EASE-Grid 2.0"], ["Polarization A", polarizations.join(", ")],
+          ["Contributing granules", granules.length],
+          ["Acquisition range (UTC)", granules[0].start.slice(0,10) + " — " + latest.start.slice(0,10)],
+          ["Collections", collections.join("; ")]])}
+        <p>Convex hull in WGS84 longitude/latitude enclosing this track's catalog footprints that overlap GAIA, across frames. The hull fills gaps and can include areas outside acquisition coverage.</p>
+        <nav>${link(["Latest granule metadata", latest.metadata_url])}${link(["ASF track search", "https://search.asf.alaska.edu/#/?dataset=NISAR&sciProducts=SME2&path=" + track.track])}${link(["SME2 product metadata", "https://nisar-docs.asf.alaska.edu/sme2/"])}</nav></section>`;
+    }
+    // Ray casting in local lon/lat space, including polygon holes. This lets a
+    // hover highlight every overlapping track, regardless of SVG drawing order.
+    function inRing(point, ring) {
+      let inside = false;
+      for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+        const [xi, yi] = ring[i], [xj, yj] = ring[j];
+        if ((yi > point[1]) !== (yj > point[1]) && point[0] < (xj-xi) * (point[1]-yi) / (yj-yi) + xi) inside = !inside;
+      }
+      return inside;
+    }
+    function contains(track, point) {
+      return track.geometry.coordinates.some(poly => inRing(point, poly[0]) && !poly.slice(1).some(hole => inRing(point, hole)));
+    }
+    const legendRow = (symbol, label, attributes='') => `<div class="legend-row" ${attributes}><span class="legend-symbol">${symbol}</span><span>${escapeHtml(label)}</span></div>`;
+    const domain = {id:'domain', ...data.domain};
+    document.getElementById('legend').innerHTML =
+      legendRow(`<span class="swatch" style="border-color:${data.map_config.boundary_color}"></span>`,
+        'GAIA domain', 'data-boundary="domain" tabindex="0" role="button"') +
+      Object.entries(kinds).filter(([key])=>data.stations.some(s=>s.kind===key)).map(([key,k])=>legendRow(
+        `<span style="color:${k.color};font-size:17px">${k.symbol}</span>`, k.label,
+        `data-kind="${key}" tabindex="0" role="button"`)).join('') +
+      trackNumbers.map(track => legendRow(`<span class="swatch track-swatch" style="border-color:${trackColor({track})}"></span>`,
+        `NISAR ${String(track).padStart(3,'0')}`, `data-track="${track}" tabindex="0" role="button" aria-label="NISAR track ${String(track).padStart(3,'0')} metadata"`)).join('') +
+      (tracks.length ? `<p class="legend-note">NISAR track convex hulls · WGS84.<br>Enclose footprints overlapping GAIA across frames; hulls fill gaps and do not imply valid retrievals.<br>Acquisitions: ${escapeHtml(acquisitionDates[0])} — ${escapeHtml(acquisitionDates.at(-1))} UTC</p>` : '') +
+      `<p class="legend-note">Source stations; use in a model run is not confirmed. Wells include historical records.<br><br>Catalogs: ${escapeHtml(data.retrieved_at.slice(0,10))} UTC</p>`;
+    if (!window.L) {
+      status.hidden=false;
+      status.textContent='The map library could not load. Connect to the internet and reload.';
+    } else {
+      const map = L.map('map',{zoomSnap:.25,scrollWheelZoom:true});
+      let mapBuilt = false;
+      function previewReady() {
+        const images = [...document.querySelectorAll('.leaflet-tile')];
+        const pane = document.querySelector('.leaflet-pane');
+        document.documentElement.dataset.mapReady = String(mapBuilt && status.hidden &&
+          !tiles.isLoading() && images.length > 0 && images.every(i=>i.complete && i.naturalWidth > 0) &&
+          pane && getComputedStyle(pane).position === 'absolute');
+      }
+      const tiles = L.tileLayer(data.map_config.basemap_url, {
+        maxZoom:19,
+        attribution:data.map_config.basemap_attribution
+      }).addTo(map);
+      tiles.on('load', previewReady);
+      tiles.on('tileerror',()=>{document.documentElement.dataset.mapReady='false';status.hidden=false;status.textContent='Some Esri tiles could not load. Station and boundary metadata remain available.';});
+      L.control.scale({imperial:false}).addTo(map);
+      const trackLayers = new Map(trackNumbers.map(track => [track, []]));
+      tracks.forEach(track => {
+        const layer = L.geoJSON({type:"Feature", geometry:track.geometry}, {
+          interactive: false, style: {color:trackColor(track), weight:1.4, opacity:.55, fillOpacity:.025, fillRule:"nonzero"}
+        }).addTo(map);
+        trackLayers.get(track.track).push(layer);
+      });
+      const trackRows = [...document.querySelectorAll("#legend [data-track]")];
+      function highlightTracks(numbers) {
+        const active = new Set(numbers);
+        trackLayers.forEach((layers, number) => layers.forEach(layer => {
+          layer.setStyle(active.has(number)
+            ? {weight:3, opacity:1, fillOpacity:.14}
+            : {weight:1.4, opacity:.55, fillOpacity:.025});
+        }));
+        trackRows.forEach(row => row.classList.toggle("active", active.has(Number(row.dataset.track))));
+      }
+      // A legend row can highlight many features, but only a singleton gets a card.
+      function bindLegend(row, highlight, features) {
+        const activate = event => {
+          highlight(true);
+          if (features.length === 1) {
+            const feature = features[0];
+            showCard(feature.key, feature.html, event, row);
+          } else hideHoverCard();
+        };
+        row.addEventListener('mouseenter', activate);
+        row.addEventListener('focus', activate);
+        row.addEventListener('click', activate);
+        row.addEventListener('mousemove', event => {
+          if (features.length === 1 && !card.hidden) positionCard(event, row);
+        });
+        row.addEventListener('keydown', event => {
+          if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); activate(event); }
+        });
+        const deactivate = () => {
+          highlight(false);
+          if (features.length === 1) hideHoverCard(features[0].key);
+        };
+        row.addEventListener('mouseleave', deactivate);
+        row.addEventListener('blur', deactivate);
+      }
+      trackRows.forEach(row => {
+        const number = Number(row.dataset.track);
+        bindLegend(row, active => highlightTracks(active ? [number] : []),
+          tracks.filter(t => t.track === number).map(t => ({key:'track:' + number, html:trackCard(t)})));
+      });
+      const domainHtml = `<div class="eyebrow">Analysis extent</div><h2>GAIA domain</h2>${
+        rows([['Domain',domain.name],['Grid CRS',domain.crs],['Grid spacing',`${domain.resolution_m} m`],
+          ['Bounds (m)',domain.bounds_m.join(', ')],['GAIA revision',data.gaia.revision.slice(0,12)]])
+        }<p>Canonical analysis-grid boundary; model outputs can use coarser grids.</p>`;
+      const domainLayer = L.geoJSON({type:'Feature',geometry:domain.geometry},{style:{
+        color:data.map_config.boundary_color, weight:2, dashArray:data.map_config.boundary_dash,
+        opacity:.95, fill:false, className:'gaia-domain'}}).addTo(map);
+      const domainRow = document.querySelector('[data-boundary="domain"]');
+      const highlightDomain = active => {
+        domainLayer.setStyle({weight:active ? 3.5 : 2});
+        domainRow.classList.toggle('active', active);
+      };
+      bindLegend(domainRow, highlightDomain, [{key:'domain', html:domainHtml}]);
+      domainLayer.on('mouseover mousemove click', event => {
+        highlightTracks([]);
+        highlightDomain(true);
+        showCard('domain', domainHtml, event, domainRow);
+      }).on('mouseout', () => { highlightDomain(false); hideHoverCard('domain'); });
+      map.fitBounds(domainLayer.getBounds(),{padding:[28,28]});
+      const stationGroups = new Map(Object.keys(kinds).map(kind => [kind, []]));
+      function highlightMarker(marker, active) {
+        marker.getElement().classList.toggle('active', active);
+        marker.setZIndexOffset(active ? 1000 : 0);
+      }
+      // Small well symbols are drawn first; other sensors remain reachable on top.
+      [...data.stations].sort((a,b)=>(a.kind==='groundwater'?0:1)-(b.kind==='groundwater'?0:1)).forEach(station=>{
+        const k=kinds[station.kind], size=station.kind==='groundwater'?16:24;
+        const symbol=['soil','groundwater'].includes(station.kind)?'':k.symbol;
+        const marker=L.marker([station.latitude,station.longitude],{icon:L.divIcon({className:'marker',
+          html:`<span class="${k.className}">${symbol}</span>`,iconSize:[size,size],iconAnchor:[size/2,size/2]}),
+          alt:station.id,keyboard:true}).addTo(map);
+        const feature = {key:station.id, marker,
+          html:`<div class="eyebrow">${escapeHtml(k.label)}</div><h2>${escapeHtml(station.id)}</h2><p>${escapeHtml(station.name)}</p>${rows([['Coordinates',coords(station.latitude,station.longitude)],...station.rows])}<nav>${station.links.map(link).join('')}</nav>`};
+        stationGroups.get(station.kind).push(feature);
+        const activate=event=>{
+          highlightTracks([]);
+          highlightMarker(marker, true);
+          showCard(feature.key, feature.html, event, marker.getElement());
+        };
+        const deactivate=()=>{ highlightMarker(marker, false); hideHoverCard(feature.key); };
+        marker.on('mouseover mousemove click',activate).on('mouseout',deactivate);
+        marker.getElement().addEventListener('focus',activate);
+        marker.getElement().addEventListener('blur',deactivate);
+      });
+      document.querySelectorAll('#legend [data-kind]').forEach(row => {
+        const features = stationGroups.get(row.dataset.kind);
+        bindLegend(row, active => {
+          highlightTracks([]);
+          features.forEach(feature => highlightMarker(feature.marker, active));
+          row.classList.toggle('active', active);
+        }, features);
+      });
+      map.on('mousemove', event => {
+        if (event.originalEvent?.target?.closest('.leaflet-marker-icon, .gaia-domain')) return;
+        const hits = tracks.filter(t => contains(t, [event.latlng.lng, event.latlng.lat]));
+        highlightTracks(hits.map(t => t.track));
+      });
+      map.getContainer().addEventListener('mouseleave', () => highlightTracks([]));
+      mapBuilt = true;
+      previewReady();
+    }
+  </script>
+</body>
+</html>

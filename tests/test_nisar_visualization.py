@@ -23,7 +23,7 @@ from nisar import discovery
 from nisar_visualization import gif as drawing
 from nisar_visualization import topographic as topo
 import visualize_nisar_sme2 as workflow
-from nisar_visualization import workflow as frames_workflow
+from nisar import selection as frames_workflow
 from test_data_downloads import catalog_item
 
 
