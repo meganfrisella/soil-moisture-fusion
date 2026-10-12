@@ -40,15 +40,15 @@ pixi shell
 
 [Interactive map](https://meganfrisella.github.io/soil-moisture-fusion/) of the GAIA domain, source stations, and NISAR footprints.
 
-[![Interactive map of the GAIA soil-state model data sources](outputs/station_map.png)]([outputs/station_map.html](https://meganfrisella.github.io/soil-moisture-fusion/))
+[![Interactive map of the GAIA soil-state model data sources](outputs/station_map.png)](https://meganfrisella.github.io/soil-moisture-fusion/)
 
 ### GAIA domain NISAR SME2
 
-[Interactive map](https://meganfrisella.github.io/soil-moisture-fusion/gaia_domain) of NISAR SME2 observations on the GAIA domain (Western Washington).
+[Interactive map](https://meganfrisella.github.io/soil-moisture-fusion/gaia_domain/) of NISAR SME2 observations on the GAIA domain (Western Washington).
 
 ### Eastern Washington NISAR SME2
 
-[Interactive map](https://meganfrisella.github.io/soil-moisture-fusion/eastern_washington) of NISAR SME2 observations in Eastern Washington.
+[Interactive map](https://meganfrisella.github.io/soil-moisture-fusion/eastern_washington/) of NISAR SME2 observations in Eastern Washington.
 
 ## Misc
 
