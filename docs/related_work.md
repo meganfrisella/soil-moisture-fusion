@@ -4,336 +4,234 @@
 
 [“Uncertainty estimates in the NISAR high-resolution soil moisture retrievals from multi-scale algorithm”](https://doi.org/10.1016/j.rse.2024.114288), *Remote Sensing of Environment*, 311, 114288. [Publisher abstract](https://www.sciencedirect.com/science/article/pii/S0034425724003067); [manuscript sections](https://www.sciencedirect.com/science/article/am/pii/S0034425724003067).
 
-### Research question
-
-How can the NISAR multi-scale retrieval algorithm estimate spatially and temporally varying soil-moisture uncertainty where ground measurements are sparse?
-
-### Data sources
-
-Fourteen UAVSAR scenes from SMAPVEX-12, June–July 2012, over agricultural fields near Carman, Manitoba, simulated to approximate NISAR characteristics; campaign soil-moisture measurements provide reference data. The algorithm disaggregates coarse ERA5-Land moisture using L-band backscatter.
-
-### Code repository
-
-No repository identified in the reviewed material or targeted title/DOI search.
-
-### Technical methodology
-
-Analytical variance propagation separates errors in coarse moisture and SAR backscatter from uncertainty in retrieval parameters. Sensitivity experiments examine each contribution; the input-error derivation assumes independence between SAR observations and coarse moisture.
-
-### Evaluation techniques
-
-Crop-wise root-mean-square predicted uncertainty is compared with retrieval ubRMSE against campaign measurements.
-
-### Results
-
-Coarse-input moisture error is a major uncertainty source. Predicted uncertainty generally exceeds observed ubRMSE across the tested crops; both remain below the mission's 0.06 m³/m³ goal in this experiment. This is a prelaunch airborne-data demonstration. [Manuscript results](https://www.sciencedirect.com/science/article/am/pii/S0034425724003067).
+- **Research question:** Spatially and temporally varying uncertainty in NISAR multiscale retrievals
+- **Data sources:** UAVSAR/SMAPVEX-12, Carman, Manitoba, June–July 2012; ERA5-Land moisture; campaign ground measurements
+- **Method:**
+  - Analytical variance propagation: coarse moisture, SAR backscatter, retrieval parameters
+  - Sensitivity experiments; assumed independence between SAR and coarse-input errors
+- **Evaluation:** Crop-wise predicted uncertainty versus retrieval unbiased RMSE
+- **Key result:** Coarse-input error a major contributor; predicted uncertainty generally above observed error
+- **Code:** No repository identified in reviewed material
+- **Takeaways:** Separate native retrieval error from gridding/depth-conversion error; track shared input errors
+- **Limitations:** Prelaunch agricultural demonstration; no local calibration or validation of every SME2 candidate; independence assumption needs testing
 
 ## Pachepsky and Hill (2017)
 
 [“Scale and scaling in soils”](https://doi.org/10.1016/j.geoderma.2016.08.017), *Geoderma*, 287, 4–30. [Publisher abstract and section excerpts](https://www.sciencedirect.com/science/article/pii/S0016706116303640); [USDA publication record and summary](https://www.ars.usda.gov/research/publications/publication/?seqNo115=325208).
 
-### Research question
-
-How can soil information measured at one spatial or temporal scale inform understanding and decisions at another? This review organizes scaling concepts and methods across soil science. [USDA summary](https://www.ars.usda.gov/research/publications/publication/?seqNo115=325208).
-
-### Data sources
-
-A synthesis of published soil studies covering pore geometry, soil water, transport, and soil-property relationships. The accessible material describes a methodological review rather than a new observational dataset.
-
-### Code repository
-
-No repository identified in the accessible abstract, section excerpts, or USDA record; the full article was not available for checking software references.
-
-### Technical methodology
-
-The review covers dimensional analysis, power laws, spatial and temporal scaling, and upscaling through changes in measurement support. Approaches for spatiotemporal patterns include empirical orthogonal functions, data assimilation, distribution matching, and temporal stability. Soil-specific topics include Richards-equation scaling and scale-dependent hydraulic parameters and pedotransfer functions. [Publisher overview](https://www.sciencedirect.com/science/article/pii/S0016706116303640).
-
-### Evaluation techniques
-
-The accessible material compares concepts and applications from prior studies. It does not provide enough detail to summarize individual validation protocols or quantitative performance.
-
-### Results
-
-The contribution is a conceptual framework and research outlook for transferring soil information across scales. [USDA summary](https://www.ars.usda.gov/research/publications/publication/?seqNo115=325208).
+- **Research question:** Transfer of soil information across spatial and temporal scales
+- **Data sources:** Published soil studies; no new observational dataset
+- **Method:** Dimensional analysis, scaling laws, changes in measurement support; assimilation, temporal stability, hydraulic-parameter scaling
+- **Evaluation:** Conceptual synthesis; individual validation protocols unavailable in reviewed excerpts
+- **Key result:** Framework for relating observations and processes across scales
+- **Code:** No repository identified in accessible material
+- **Takeaways:** Define support for satellite cells, point sensors, and model states; distinguish grid spacing from resolving power
+- **Limitations:** Abstract/excerpts reviewed; no operational SME2 algorithm or calibrated uncertainty model
 
 ## Yu et al. (2025)
 
 [“Spatial Soil Moisture Prediction From In Situ Data Upscaled to Landsat Footprint: Assessing Area of Applicability of Machine Learning Models”](https://doi.org/10.1109/TGRS.2025.3565818), *IEEE TGRS*, 63. [Full text](https://smartdigiag.com/downloads/journal/malone2025_4.pdf).
 
-### Research question
-
-Can a clustered monitoring network support daily soil moisture maps beyond its station locations, and how can the reliable geographic extent of a trained model be identified? The study addresses both point-to-pixel mismatch and uncertainty when extrapolating into unfamiliar landscapes.
-
-### Data sources
-
-Twenty-eight [OzNet](https://www.oznet.org.au/) stations provide near-surface soil moisture for 2016–2021 in the Yanco agricultural region, Australia. The main domain is 100 × 100 km; an extended 300 × 300 km domain tests broader applicability.
-
-Predictors include MODIS/Landsat albedo, vegetation indices, land-surface temperature and evapotranspiration; ANUClimate meteorology; elevation; and Australian soil properties. Independent references comprise [PRISM field campaigns](https://prism.monash.edu/index.html), CosmOz, OzFlux, and SMAP retrievals. The [experimental archive](https://doi.org/10.25919/dhxv-nz94) provides supporting data.
-
-### Code repository
-
-[OzNet_AOA](https://github.com/yuyi13/OzNet_AOA), with a [Zenodo archive](https://doi.org/10.5281/zenodo.15290777), contains R code for an executable AOA demonstration and scripts documenting fusion, prediction, validation, and figures. The demonstration trains XGBoost, computes dissimilarity, and maps applicability. The repository describes the broader experimental and figure scripts as requiring additional data and preparation.
-
-### Technical methodology
-
-ESTARFM fuses MODIS/Landsat reflectance predictors; ubESTARFM adds local bias correction for temperature. These supply daily predictors at approximately 100 m resolution. Random forests and XGBoost then learn relationships between station moisture and environmental covariates.
-
-The area of applicability (AOA) uses distances between standardized predictor combinations, weighted by model feature importance. A dissimilarity index compares prediction locations with training conditions; an outlier-adjusted threshold defines the applicability boundary. This is a diagnostic of extrapolation risk, with interpretation tied to the validation design.
-
-### Evaluation techniques
-
-Fourfold spatial validation holds out seven stations per fold during 2016–2019. Cross-cluster validation transfers between two station clusters. Testing during 2020–2021 adds temporal separation. Independent observations assess spatial patterns, time series, bias, and unbiased error; evaluation also compares conditions inside and outside the AOA.
-
-### Results
-
-RF/XGBoost AOAs cover 43.1%/41.5% of the original domain. RF correlations are 0.62–0.64 against field campaigns, 0.84–0.91 against monitoring networks, and 0.87 against SMAP during cross-validation. Predictions within the AOA have lower errors. The main contribution is a mapped boundary on where model performance can reasonably transfer; applicability remains dependent on the training network and represented environmental conditions.
+- **Research question:** Daily moisture prediction beyond station locations; geographic limits of model applicability
+- **Data sources:**
+  - [OzNet](https://www.oznet.org.au/), Yanco, Australia, 2016–2021; MODIS/Landsat predictors, ANUClimate, terrain and soils
+  - [PRISM](https://prism.monash.edu/index.html), CosmOz, OzFlux, SMAP references; [experimental archive](https://doi.org/10.25919/dhxv-nz94)
+- **Method:** ESTARFM/ubESTARFM predictor fusion; RF/XGBoost moisture prediction; feature-weighted dissimilarity defining area of applicability (AOA)
+- **Evaluation:** Spatial and cross-cluster holdouts during 2016–2019; temporal testing during 2020–2021; independent reference comparisons
+- **Key result:** Lower errors inside the AOA; applicability limited to represented environmental conditions
+- **Code:** [OzNet_AOA](https://github.com/yuyi13/OzNet_AOA), [Zenodo](https://doi.org/10.5281/zenodo.15290777); executable AOA example; broader workflow requires additional inputs
+- **Takeaways:** Close daily mapping analogue; spatial/temporal holdouts and extrapolation diagnostics
+- **Limitations:** Ground-training and covariate dependence; AOA neither a predictive interval nor proof of SME2 subpixel detail
 
 ## Kalaiselvi et al. (2026)
 
 [“Air quality prediction using multi-source remote sensing data integration with hybrid deep learning framework”](https://www.nature.com/articles/s41598-025-32466-0), *Scientific Reports*, 16, 2688.
 
-### Research question
-
-Can a common architecture combine satellite imagery, weather, and monitoring stations to improve daily PM₂.₅, PM₁₀, NO₂, and O₃ predictions, including transfer between cities and estimates of predictive uncertainty?
-
-### Data sources
-
-The study covers Delhi, Los Angeles, and Beijing during 2019–2023. Satellite inputs are [Sentinel-5P](https://developers.google.com/earth-engine/datasets/catalog/sentinel-5p), [MODIS MAIAC aerosol optical depth](https://developers.google.com/earth-engine/datasets/catalog/MODIS_061_MCD19A2_GRANULES), and [Landsat-8 surface reflectance](https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LC08_C02_T1_L2), with [ERA5](https://developers.google.com/earth-engine/datasets/catalog/ECMWF_ERA5_DAILY) meteorology. Ground observations come from [CPCB](https://app.cpcbccr.com/ccr/), [SCAQMD](https://www.aqmd.gov/home/air-quality/air-quality-data-studies/historical-data-by-year), and [Beijing's monitoring center](https://www.bjmemc.com.cn/).
-
-These sources contribute different information: atmospheric composition, aerosol loading, surface conditions, weather, and locally measured pollutant concentrations. Their original spatial supports differ substantially.
-
-### Code repository
-
-No repository identified in the article. The described implementation uses TensorFlow/Keras and NVIDIA V100 hardware; public input datasets alone do not reproduce the complete preprocessing and training workflow.
-
-### Technical methodology
-
-MAST-Net aligns inputs to daily 1 km grids through interpolation and aggregation, with quality filtering and gap filling. Parallel CNN branches extract spatial features, a bidirectional LSTM represents temporal dependencies, and multi-head attention combines information across sources. Feature selection uses mutual information and gradient-based importance.
-
-Predictive uncertainty is estimated through stochastic dropout, independently trained model ensembles, and quantile regression. These approaches respectively vary active network connections, fitted models, and predicted distributional quantiles. A common output grid should be understood separately from the native resolving power of each input.
-
-### Evaluation techniques
-
-The paper reports an 80/10/10 training/validation/test split, fivefold cross-validation, component ablations, and transfer between cities with and without local fine-tuning. Baselines include CNN–LSTM, CNN–LSTM with attention, random forests, support-vector regression, and linear regression. Metrics include RMSE, MAE, and R².
-
-The split description does not establish explicit spatial or temporal blocking, leaving the independence of nearby samples unclear.
-
-### Results
-
-[Table 3](https://www.nature.com/articles/s41598-025-32466-0/tables/3) reports PM₂.₅ RMSE of 8.2 µg/m³ versus 11.6 for CNN–LSTM, and NO₂ RMSE of 6.7 versus 9.8. MAST-Net R² ranges from 0.87 for O₃ to 0.94 for NO₂. The text reports cross-city R² of 0.79–0.87 and smaller transfer losses after fine-tuning. The findings support the value of multimodal and temporal modeling, while reproducibility and validation independence need closer examination before interpreting generalization claims.
+- **Research question:** Multisource daily air-quality prediction with transferability and uncertainty
+- **Data sources:** Delhi, Los Angeles, Beijing, 2019–2023; Sentinel-5P, MODIS, Landsat-8, ERA5, regulatory stations
+- **Method:**
+  - Common-grid interpolation and temporal aggregation; CNN–BiLSTM with attention
+  - Dropout, model ensembles, quantile regression for predictive uncertainty
+- **Evaluation:** Train/validation/test split, cross-validation, ablations, cross-city transfer; RMSE, MAE, R²
+- **Key result:** Reported improvements over tested baselines and benefits from local fine-tuning
+- **Code:** No repository identified in article
+- **Takeaways:** Architectural example for complementary spatial/temporal predictors and uncertainty estimation
+- **Limitations:** Air-quality application; unclear spatial/temporal blocking; common-grid resampling does not resolve support mismatch or validate soil-moisture uncertainty
 
 ## Agata et al. (2025)
 
 [“Physics-informed deep learning quantifies propagated uncertainty in seismic structure and hypocenter determination”](https://www.nature.com/articles/s41598-024-84995-9), *Scientific Reports*, 15, 1846.
 
-### Research question
-
-How can uncertainty in a seismic velocity model be represented as a distribution and carried into subsequent inversions? The central issue is that an apparently precise downstream estimate can be misleading when it assumes a single, perfectly known velocity structure.
-
-### Data sources
-
-The study uses 14,146 manually picked first-arrival times from the KI03 active-source seismic survey near the Nankai Trough, Japan. TK5 reflection data constrain subsurface interfaces. Nine DONET stations supply P-wave arrivals from the 2016 Mw 5.9 earthquake.
-
-Survey records are available through the [JAMSTEC Seismic Survey Database](https://www.jamstec.go.jp/obsmcs_db/e/), and bathymetry through [DARWIN](https://www.godac.jamstec.go.jp/darwin/en/). Collaborators supplied the processed arrival picks, so access to raw recordings and access to the exact inversion inputs are distinct reproducibility requirements.
-
-### Code repository
-
-No repository identified in the article. The methods describe network training and inference, but a directly linked, complete implementation was not located.
-
-### Technical methodology
-
-Separate neural networks represent continuous seismic velocity and travel-time fields. The eikonal equation constrains wavefront propagation, connecting the estimated velocity field to observed travel times. Function-space particle variational inference produces an ensemble of 256 velocity models representing posterior uncertainty.
-
-The downstream inversion averages likelihood contributions over this ensemble. In statistical terms, uncertainty in the velocity field is marginalized: several plausible structures contribute to the distribution of the inferred quantity. Pretrained travel-time networks make these repeated forward calculations tractable. The demonstration uses 128 particles for source location and also propagates velocity uncertainty into reflector depths.
-
-### Evaluation techniques
-
-The authors compare inversions that include or omit velocity uncertainty, compare recovered structures with earlier tomography, and assess neural travel times against fast marching calculations. Evaluation examines posterior spread, changes in inferred depth, and the probability of association with candidate fault interfaces.
-
-These comparisons establish the consequences of the uncertainty assumptions; they do not supply an independently known true earthquake location.
-
-### Results
-
-Including propagation gives a source depth of 10.81 km with a standard deviation of 0.68 km and changes estimated plate-boundary association probability from 8% to 35%. The downstream ensemble inversion takes approximately 11 minutes on 128 CPU cores after network training.
-
-The study demonstrates practical uncertainty propagation through seismic inversion, but assumes a two-dimensional velocity profile extended uniformly along strike. Picking-error assumptions, forward-model approximation, and unrepresented three-dimensional structure limit how completely the ensemble describes uncertainty.
+- **Research question:** Propagation of uncertain seismic velocity structure into downstream inversions
+- **Data sources:** KI03/TK5 surveys near Nankai Trough; DONET arrivals from the 2016 earthquake; [JAMSTEC](https://www.jamstec.go.jp/obsmcs_db/e/), [DARWIN](https://www.godac.jamstec.go.jp/darwin/en/)
+- **Method:**
+  - Eikonal-constrained neural fields; particle variational inference for velocity ensembles
+  - Likelihood marginalization over velocity uncertainty for hypocenter/reflector estimation
+- **Evaluation:** With/without propagation; earlier tomography; fast-marching travel times
+- **Key result:** Propagation changes inferred source depth and plate-boundary association
+- **Code:** No repository identified; exact processed arrival picks supplied by collaborators
+- **Takeaways:** Carry upstream parameter/field uncertainty into downstream soil-state inference
+- **Limitations:** Seismic inversion rather than moisture fusion; simplified geometry and error assumptions; no independently known hypocenter truth
 
 ## Chao et al. (2026)
 
-[“A two-stage data fusion framework for multi-source precipitation estimates integrating gauge, radar, and satellite observations via deep learning and Bayesian model averaging”](https://doi.org/10.1016/j.jhydrol.2026.135764), *Journal of Hydrology*, 677, 135764. [Full text](chao.pdf).
+[“A two-stage data fusion framework for multi-source precipitation estimates integrating gauge, radar, and satellite observations via deep learning and Bayesian model averaging”](https://doi.org/10.1016/j.jhydrol.2026.135764), *Journal of Hydrology*, 677, 135764. [Publisher abstract](https://www.sciencedirect.com/science/article/abs/pii/S0022169426008619).
 
-### Research question
-
-Can separating deterministic spatiotemporal correction from probabilistic calibration improve precipitation estimates, prediction intervals, and performance under sparse gauge coverage? The study tests a modular fusion framework across daily, hourly, and half-hourly resolutions.
-
-### Data sources
-
-The Tunxi River basin in China supplies 45 gauges: 18 from hydrological yearbooks and 27 from the Xin’anjiang experimental watershed. Only the latter support half-hourly evaluation. Huangshan radar provides reflectivity-derived precipitation; satellite inputs are [bias-corrected CMORPH](https://www.ncei.noaa.gov/products/climate-data-records/precipitation-cmorph) and [GPM IMERG V07 Final](https://disc.gsfc.nasa.gov/datasets/GPM_3IMERGDF_07/summary).
-
-May–September 2019–2020 supports training and BMA calibration; 2022 supports evaluation. Gauge and radar records are institutionally restricted. Satellite products are public and already contain upstream gauge adjustments.
-
-### Code repository
-
-[hou-1915/code](https://github.com/hou-1915/code) provides the core Python implementation of 3D-CNN–ConvLSTM correction, model selection, and expectation–maximization-based Bayesian model averaging. Users must prepare NumPy inputs; the restricted local observations prevent complete reproduction from public inputs alone.
-
-### Technical methodology
-
-Radar processing includes quality filtering, a reflectivity–rainfall relation, temporal accumulation, and gauge-based bias correction. Gridded products are aligned, normalized using training-period statistics, and sampled into spatial/temporal cubes around gauges.
-
-The first stage combines 3D convolution with ConvLSTM to correct precipitation using spatial patterns and temporal evolution. Its loss equally weights correlation and Kling–Gupta efficiency, balancing association with mean and variability agreement.
-
-The second stage combines corrected members through a Gaussian-mixture BMA distribution. Box–Cox transformation addresses skewness; expectation–maximization estimates member weights and variances. BMA is calibrated on training-period predictions and then applied to 2022. Weights are global within each temporal-scale/network-density setting.
-
-### Evaluation techniques
-
-Baselines include CNN, LSTM, Transformer, standalone BMA, and quantile LightGBM. Hourly fivefold spatial validation excludes approximately nine stations per fold. Further experiments remove sources, vary gauge counts from 18 to 45, and examine a heavy-rainfall event.
-
-Metrics include correlation, RMSE, bias, KGE, critical success index, false alarm ratio, CRPS, and 95% interval coverage, width, and coverage error. Loss weighting is selected using 2022, limiting its independence as a test year. Upstream gauge adjustment also prevents assuming complete independence between satellite predictors and gauge references.
-
-### Results
-
-Daily correlation reaches 0.994, RMSE 1.685 mm/day, and KGE 0.972; radar alone gives 0.942, 5.231 mm/day, and 0.750. Hourly spatial validation gives correlation 0.894 and RMSE 0.658 mm/hour.
-
-DBMPF improves interval calibration and event detection, with diminishing gains as gauge density increases. Radar contributes the dominant information; satellites provide complementary coverage. Uncertainty grows with rainfall intensity, and performance remains constrained for very light and extreme rainfall. The paper does not directly test benefits in a rainfall–runoff model.
+- **Research question:** Separate deterministic correction and probabilistic calibration for precipitation fusion
+- **Data sources:** Tunxi basin, China; gauges, Huangshan radar, CMORPH, IMERG; May–September 2019–2020 training/calibration, 2022 evaluation
+- **Method:** 3D-CNN–ConvLSTM correction; Box–Cox transformation and Gaussian-mixture Bayesian model averaging (BMA)
+- **Evaluation:** Model baselines, spatial holdouts, source ablations, gauge-density experiments; point errors, event detection, CRPS, interval coverage/width
+- **Key result:** Better point estimates and interval calibration; diminishing gains with denser gauge coverage
+- **Code:** [hou-1915/code](https://github.com/hou-1915/code); core workflow available, local gauge/radar inputs restricted
+- **Takeaways:** Evaluate accuracy and calibration separately across temporal scales and observation densities
+- **Limitations:** Precipitation-specific model; test-year loss selection and upstream gauge adjustment weaken independence; BMA weights global within each setting
 
 ## Zheng et al. (2026)
 
 [“A Bayesian INLA-SPDE approach to spatio-temporal point-grid fusion with change-of-support and misaligned covariates”](https://doi.org/10.1016/j.spasta.2026.100998), *Spatial Statistics*, 74, 100998. [Published full text](https://eprints.gla.ac.uk/386764/1/386764.pdf).
 
-### Research question
+- **Research question:** Point–grid fusion with differing supports and uncertain, misaligned covariates
+- **Data sources:** Elliot Water, Scotland; SEPA moisture/temperature and rain gauges; daily Copernicus soil-water index, elevation; May 6–15, 2022 application
+- **Method:**
+  - Matérn-SPDE latent fields, AR(1) time dependence, INLA inference
+  - Point/cell-average observation operators; source-specific errors; jointly inferred covariate fields
+- **Evaluation:** Synthetic missing-data/holdout experiments; point-only, grid-only, joint models; next-day prediction and interval calibration
+- **Key result:** Better interval calibration than fixed-rainfall baseline, at the cost of wider intervals and higher point error
+- **Code:** [STDF-COSP](https://github.com/weiyue-zheng/STDF-COSP); R simulations with INLA, rSPDE, inlabru
+- **Takeaways:** Constrain the fine field at native SME2 support; propagate covariate uncertainty
+- **Limitations:** Short, standardized-scale application; stationary/separable dependence and prior sensitivity; no validated local volumetric or depth conversion
 
-How can observations of the same process on point and grid supports be fused when covariates are also spatially misaligned? The objective is joint prediction with uncertainty that includes observation error, latent spatial/temporal variation, and uncertain covariate values.
+## Peng et al. (2017)
 
-### Data sources
+[“A review of spatial downscaling of satellite remotely sensed soil moisture”](https://doi.org/10.1002/2016RG000543), *Reviews of Geophysics*, 55, 341–366.
 
-The Elliot Water catchment, Scotland, has [SEPA](https://www2.sepa.org.uk/sensornet) measurements from 22 soil stations and 10 rain gauges. Soil temperature is colocated with soil moisture; rainfall is spatially misaligned. Daily 1 km [Copernicus soil-water index](https://land.copernicus.eu/global/products/ssm) contributes gridded information, and [Open Elevation](https://open-elevation.com/) supplies a fixed covariate.
+- **Research question:** Assumptions and tradeoffs of satellite soil-moisture downscaling
+- **Data sources:** Published microwave, optical/thermal, terrain, and model studies
+- **Method:** Taxonomy of satellite fusion, geoinformation-based, and model-based approaches; statistical and evaporation-based methods
+- **Evaluation:** Synthesis of published validations with differing inputs and reference supports
+- **Key result:** Potential spatial gains; no defensible universal ranking across unlike experiments
+- **Code:** Methodological review; no implementation repository identified
+- **Takeaways:** Choose justified predictors and scaling assumptions; distinguish inferred structure from resampling
+- **Limitations:** Mostly much coarser inputs; no established gain for SME2's 200 m native spacing → 90 m target spacing
 
-The illustrated next-day prediction uses May 6–15, 2022. In-situ volumetric water content and satellite soil-water index are standardized separately, giving a common analysis scale despite their different original definitions.
+## Jones (1999)
 
-### Code repository
+[“First- and Second-Order Conservative Remapping Schemes for Grids in Spherical Coordinates”](https://doi.org/10.1175/1520-0493%281999%29127%3C2204%3AFASOCR%3E2.0.CO%3B2), *Monthly Weather Review*, 127, 2204–2210.
 
-[STDF-COSP](https://github.com/weiyue-zheng/STDF-COSP) supplies R simulation code and data links. The documented workflow generates latent fields and observations, fits point-only, grid-only, and joint models, and evaluates withheld spatial locations. Dependencies include INLA, rSPDE, and inlabru. The README's example is configured for three time points.
+- **Research question:** Transfer between grids while preserving area integrals
+- **Data sources:** Analytical fields on alternative spherical grids
+- **Method:** Cell-overlap integration; piecewise-constant first-order and gradient-based second-order reconstruction
+- **Evaluation:** Remapping accuracy on test fields
+- **Key result:** More accurate second-order reconstruction while retaining conservation
+- **Code:** Availability not verified; publisher-indexed methodology reviewed
+- **Takeaways:** Area-overlap baseline from native EPSG:6933 cells to the target grid
+- **Limitations:** No new subpixel information or temporal dynamics; water-storage conservation also requires layer thickness; masking and uncertainty propagation require explicit treatment
 
-### Technical methodology
+## Zhang et al. (2023)
 
-A Bayesian hierarchy represents continuous spatial fields using Matérn-SPDE priors on triangular meshes, with AR(1) temporal dependence. Source-specific operators evaluate fields at points or average them over grid cells; source-specific errors allow different observation precision.
+[“Temporal Gap-Filling of 12-Hourly SMAP Soil Moisture Over the CONUS Using Water Balance Budgeting”](https://doi.org/10.1029/2023WR034457), *Water Resources Research*.
 
-Misaligned covariates are themselves latent spatiotemporal fields, estimated jointly with the response. This carries uncertainty from incomplete covariate observations into prediction. INLA approximates posterior marginals efficiently using the sparse Gaussian Markov representation.
+- **Research question:** Reconstruct moisture between satellite acquisitions using rainfall and drying behavior
+- **Data sources:** SMAP, GPM IMERG, ground moisture, NLDAS precipitation; CONUS, April 2015–March 2021
+- **Method:** Precipitation-driven water balance; hydrologic losses calibrated from observed drying periods; 12-hour output intervals
+- **Evaluation:** Ground comparisons and rainfall-response tests versus linear interpolation and three-dimensional smoothing
+- **Key result:** Better capture of rainfall-induced peaks, particularly during sparse observation periods
+- **Code:** No repository identified in reviewed article
+- **Takeaways:** Candidate daily reconstruction; event-response evaluation
+- **Limitations:** Precipitation quality and sufficient drying observations essential; SME2 cadence may hinder calibration; parameter/forcing uncertainty and spatial detail unresolved
 
-The statistical meaning of a cell average is retained through its observation operator. Producing predictions on a finer mesh therefore does not turn a coarse observation into multiple independent fine-scale measurements.
+## Huang et al. (2022)
 
-### Evaluation techniques
+[“A Novel Fusion Method for Generating Surface Soil Moisture Data With High Accuracy, High Spatial Resolution, and High Spatio-Temporal Continuity”](https://doi.org/10.1029/2021WR030827), *Water Resources Research*.
 
-One hundred simulation replicates compare point-only, grid-only, and joint models while varying available history—3, 7, or 10 time points—and covariate availability. Tests include unobserved locations and next-day prediction. Parameter RMSE and predictive errors assess estimation; application comparisons add 95% interval coverage, mean width, and interval score.
+- **Research question:** Daily, spatially complete soil moisture at field scale
+- **Data sources:** Landsat, MODIS, SMAP Level-4, ERA5, HOAL ground network, Austria
+- **Method:** GRASPS: ESTARFM predictor fusion → deep belief network → pixel-class bias correction; 30 m daily output grid
+- **Evaluation:** April–October 2018 training; 2017 ground validation; comparisons with model-based products
+- **Key result:** Improved ground agreement through fusion and bias correction
+- **Code:** No repository identified in reviewed article
+- **Takeaways:** Close analogue for combining spatial downscaling and daily estimation
+- **Limitations:** Extensive predictors and ground training; local transfer, native-SME2 consistency, and propagated uncertainty unestablished
 
-A simplified baseline treats rainfall as a fixed covariate instead of a jointly inferred field.
+## Preimesberger et al. (2025)
 
-### Results
+[“ESA CCI Soil Moisture GAPFILLED: an independent global gap-free satellite climate data record with uncertainty estimates”](https://doi.org/10.5194/essd-17-4305-2025), *Earth System Science Data*, 17, 4305–4329.
 
-Fusion generally improves simulated prediction, although improvements vary across parameters. In the application, the joint model achieves 0.90 coverage for nominal 95% intervals versus 0.40 for the fixed-rainfall baseline. Interval score improves from 9.36 to 3.91, while interval width increases from 0.68 to 2.42 and RMSE worsens from 0.62 to 0.84.
+- **Research question:** Satellite moisture gap filling with explicit uncertainty
+- **Data sources:** Global ESA CCI, January 1991–December 2023, 0.25° grid; ground references, GLDAS, temperature and vegetation information
+- **Method:** Discrete-cosine penalized smoothing (DCT-PLS) across space/time; separate frozen-period interpolation; combined retrieval/gap-filling uncertainty
+- **Evaluation:** Ground comparisons; restoration of artificially masked model data
+- **Key result:** Broad agreement retained; weaker performance under sparse coverage and complex conditions
+- **Code:** [pytesmo](https://github.com/TUW-GEO/pytesmo), DCT-PLS implementation; [dataset](https://doi.org/10.48436/hcm6n-t4m35)
+- **Takeaways:** Statistical baseline; distinguish original observations, predictions, and gap-filling uncertainty
+- **Limitations:** Coarse-grid demonstration; smoothing can suppress extremes; ancillary temperature/vegetation still used for classification/uncertainty; local calibration needed
 
-These standardized-scale results demonstrate a tradeoff between point accuracy and calibrated uncertainty. The sparse network, short application window, and prior sensitivity constrain generalization beyond the evaluated setting.
+## Sabaghy et al. (2020)
+
+[“Comprehensive analysis of alternative downscaled soil moisture products”](https://doi.org/10.1016/j.rse.2019.111586), *Remote Sensing of Environment*, 239, 111586.
+
+- **Research question:** Relative downscaling performance against common reference data
+- **Data sources:** SMAPEx-4/5 airborne measurements and OzNet stations, Yanco, Australia
+- **Method:** Radar-, optical-, radiometer-, and oversampling-based products; coarse-input baselines
+- **Evaluation:** Spatial patterns and temporal agreement against airborne maps and ground time series
+- **Key result:** Rankings depend on reference and dimension evaluated; station-only validation insufficient for spatial gains
+- **Code:** No repository identified in reviewed abstract/excerpts
+- **Takeaways:** Common holdouts/baselines; evaluate spatial detail separately from temporal skill
+- **Limitations:** Coarser products and different landscape; validating 90 m detail requires suitable spatial reference observations
+
+## Liu, Xin, and Tian (2026)
+
+[“A novel fusion framework for generating 30 m daily seamless soil moisture with reliable performance”](https://doi.org/10.1016/j.jhydrol.2026.135791), *Journal of Hydrology*, 677, 135791. This is an additional candidate for methodological comparison.
+
+- **Research question:** Fine-grid daily moisture without ground training labels
+- **Data sources:** MODIS, Harmonized Landsat–Sentinel, SMAP/Sentinel moisture, terrain, soils; Naqu/Maqu ground validation, Tibetan Plateau
+- **Method:** MSRNet predictor super-resolution; SMSNet trained at an intermediate scale and applied to 30 m daily inputs
+- **Evaluation:** Ground comparison and Naqu-to-Maqu transfer
+- **Key result:** Reported improvement over input moisture without ground observations for training
+- **Code:** No repository identified in reviewed abstract/excerpts
+- **Takeaways:** Additional candidate where local training observations are insufficient
+- **Limitations:** Cross-scale/landscape transfer needs testing; calibrated uncertainty and native-SME2 consistency unestablished; fine output spacing not independent fine-scale observations
 
 ## GAIA HazLab — Digital Twin of Soil
 
 [GAIA Digital Twin of Soil](https://gaia-hazlab.github.io/gwl-space-time-smooth/twin/), evolving project documentation.
 
-### Research question
-
-How can observations with different footprints, depths, and sampling rates constrain coupled water-table depth, soil moisture, and near-surface stiffness? The intended product is a regional soil reanalysis for flood, landslide, and liquefaction applications, with explicit uncertainty and spatial-support accounting.
-
-### Data sources
-
-The [input catalog](https://gaia-hazlab.github.io/gwl-space-time-smooth/twin/01-input-data.html) describes NWIS wells, USGS streamflow, SNOTEL moisture/snow measurements, and UW/CC seismic observations. Terrain, SOLUS100 soils, and geology supply static information; precipitation and meteorological products drive temporal changes.
-
-The documentation distinguishes assimilated observations, model forcing, evaluation data, and planned streams. Wells require screening for the aquifer interval they measure: a confined head measurement cannot automatically be treated as the water-table surface. Seismic dv/v represents a sampled subsurface volume whose support depends on station geometry and coda sensitivity.
-
-### Code repository
-
-[gwl-space-time-smooth](https://github.com/gaia-hazlab/gwl-space-time-smooth) contains data retrieval, physical models, assimilation, diagnostics, and documentation. It is an evolving implementation; the [assimilation chapter](https://gaia-hazlab.github.io/gwl-space-time-smooth/twin/04-assimilation.html) explicitly distinguishes the current snapshot update from a planned cycling filter with groundwater storage as the primary state.
-
-### Technical methodology
-
-A 90 m structural description combines terrain and soil properties with dynamic water-budget and hydromechanical models. A Gaussian prior on state anomalies supplies spatial covariance.
-
-Observation operators map the common state to each measurement's support: points, satellite pixel averages, seismic sensitivity volumes, or basin-integrated quantities. A linear-Gaussian update combines prior and observation precision and returns posterior covariance. The current reduced groundwater update operates on water-table-head anomalies.
-
-Temporal mismatch is represented with exponentially decaying correlation. Older observations have reduced sensitivity to the present state and additional evolution uncertainty. Distinct correlation times allow soil moisture and groundwater to respond differently. Covariance ranges and observation-error values are treated as provisional calibration parameters.
-
-### Evaluation techniques
-
-The [evaluation chapter](https://gaia-hazlab.github.io/gwl-space-time-smooth/twin/05-state-evaluation.html) separates independent tests, shared-forcing comparisons, and synthetic demonstrations. Observations are compared at their native support. Diagnostics include posterior variance reduction, information gain, averaging-kernel width, and degrees of freedom for signal. These distinguish reduced uncertainty from the ability to localize a spatial feature.
-
-### Results
-
-The repository produces evolving 90 m fields and uncertainty budgets. It reports domain-mean moisture correlation around 0.94 against another field sharing its forcing, explicitly interpreted as a consistency check. Sensitivity and observability diagnostics illustrate the complementary contributions of ground and seismic networks.
-
-The 90 m output spacing is a representation choice; actual resolving power depends on observation footprints and priors. A fully cycling storage-based assimilation system remains a stated development target, so the documentation should be read as a combination of implemented methods, demonstrations, and proposed extensions.
-
-**Role in this project:** Integrate NISAR SME2 surface soil moisture, including propagated surface-to-root-zone conversion and propagated uncertainties, into GAIA HazLab's soil-state model.
+- **Research question:** Fusion across footprints, depths, and cadences for coupled soil-state estimation
+- **Data sources:** NWIS wells, USGS streamflow, SNOTEL, seismic records; terrain, soils, geology, meteorological forcing; [input catalog](https://gaia-hazlab.github.io/gwl-space-time-smooth/twin/01-input-data.html)
+- **Method:**
+  - Terrain/soil structure, water-budget and hydromechanical models; Gaussian spatial priors
+  - Point, pixel, volume, and basin observation operators; age-dependent sensitivity and evolution uncertainty
+  - Current reduced update: snapshot water-table-head anomaly; storage-based cycling filter remains a target
+- **Evaluation:** Native-support comparisons; uncertainty reduction, averaging kernels, observability; independent tests distinguished from model cross-checks and synthetic demonstrations
+- **Key result:** Framework for heterogeneous assimilation; output spacing and variance reduction insufficient to establish resolving power
+- **Code:** [gwl-space-time-smooth](https://github.com/gaia-hazlab/gwl-space-time-smooth); local [assimilation](../../gwl-space-time-smooth/docs/twin/04-assimilation.qmd) and [evaluation](../../gwl-space-time-smooth/docs/twin/05-state-evaluation.qmd) chapters checked
+- **Takeaways:** Destination for SME2 constraints in the Pacific Northwest; propagate gridding and surface-to-root-zone uncertainty
+- **Limitations:** Provisional covariance/error assumptions; planned versus implemented components; no independent proof of 90 m daily skill
 
 ## Denolle Lab — codameter
 
 [codameter](https://github.com/Denolle-Lab/codameter), research software for measuring and interpreting relative seismic velocity change with propagated uncertainties. The repository identifies its companion framework manuscript as in preparation.
 
-### Research question
-
-How can uncertainty in dv/v measurements, including sensitivity to processing choices, be quantified and propagated into physical interpretations of subsurface change?
-
-### Data sources
-
-The interpretation workflow accepts dv/v time series, measurement errors, environmental forcings, and site information. Examples include synthetic data and a loader for the [Clements and Denolle (2023) California dataset](https://doi.org/10.5281/zenodo.6413275). The repository also generates synthetic correlation functions with known imposed dv/v for measurement testing. [Documentation](https://github.com/Denolle-Lab/codameter#readme).
-
-### Code repository
-
-[Denolle-Lab/codameter](https://github.com/Denolle-Lab/codameter). The [measurement uncertainty module](https://github.com/Denolle-Lab/codameter/blob/master/src/codameter/uq_measurement.py) provides coherence-based error estimates, processing ensembles, temporal error covariance, and reference-related uncertainty calculations.
-
-### Technical methodology
-
-The measurement module combines uncertainty within each processing configuration with variability across configurations. It represents dependence from overlapping stacks and shared references through measurement covariance, rather than only independent error bars. Reference inversion also supports estimating a relative dv/v series from pairwise measurements. These are implemented uncertainty models; their adequacy depends on the chosen ensemble and covariance assumptions. [Source code](https://github.com/Denolle-Lab/codameter/blob/master/src/codameter/uq_measurement.py).
-
-### Evaluation techniques
-
-Seeded synthetic correlation datasets impose known velocity changes and vary noise, waveform decorrelation, and frequency-dependent structure. Recovery against known truth tests processing sensitivity and supports regression checks. [Synthetic dataset generator](https://github.com/Denolle-Lab/codameter/blob/master/src/codameter/golden.py).
-
-### Results
-
-The reviewed code provides dv/v ensemble means, standard deviations, and covariance calculations suitable for probabilistic downstream inference. This review did not run the package or establish calibration on Odessa observations.
-
-**Role in this project:** Codameter will supply the dv/v input with uncertainties to GAIA HazLab's soil-state model.
+- **Research question:** Measurement uncertainty in seismic relative velocity change (dv/v)
+- **Data sources:** Correlations/dv/v series, measurement errors, forcing/site information; synthetic examples and [Clements–Denolle data](https://doi.org/10.5281/zenodo.6413275)
+- **Method:**
+  - Within-configuration uncertainty plus between-configuration processing variability
+  - Covariance for overlapping stacks/shared references; inversion of pairwise relative measurements
+- **Evaluation:** [Seeded synthetic recovery](https://github.com/Denolle-Lab/codameter/blob/master/src/codameter/golden.py) with imposed velocity changes, noise, and decorrelation
+- **Key result:** Ensemble means, standard deviations, and covariance for downstream inference
+- **Code:** [codameter](https://github.com/Denolle-Lab/codameter), [measurement uncertainty module](https://github.com/Denolle-Lab/codameter/blob/master/src/codameter/uq_measurement.py)
+- **Takeaways:** Assumed supplier of dv/v and covariance; propagate alongside SME2 errors into soil states
+- **Limitations:** Research software, companion manuscript in preparation in reviewed documentation; calibration depends on ensemble/error assumptions; no local validation established here
 
 ## Bensen et al. (2007)
 
 [“Processing seismic ambient noise data to obtain reliable broad-band surface wave dispersion measurements”](https://doi.org/10.1111/j.1365-246X.2007.03374.x), *Geophysical Journal International*, 169(3), 1239–1260. [Full text](https://academic.oup.com/gji/article/169/3/1239/626431).
 
-### Research question
-
-Which processing choices recover reliable broadband surface-wave dispersion from ambient seismic noise, and how can measurement uncertainty be estimated automatically? The paper develops a complete workflow in which data selection and repeatability assessment accompany waveform processing.
-
-### Data sources
-
-Examples use continuous broadband records from North America, Europe, and New Zealand, acquired through [IRIS DMC](https://ds.iris.edu/ds/nodes/dmc/), [ORFEUS](https://www.orfeus-eu.org/data/), and [GeoNet](https://www.geonet.org.nz/data/types/seismic_waveforms). Records span daily segments and longer stacks, including year-long station-pair correlations. The examples cover different noise environments and station geometries, allowing processing choices to be assessed across observational settings.
-
-### Code repository
-
-No repository identified in the article. The paper provides an algorithmic processing sequence and selection criteria; reproducing a particular example also requires its station/channel choices, dates, frequency bands, and instrument responses.
-
-### Technical methodology
-
-Single-station preparation removes instrument response, mean and trend, then applies bandpass filtering. Running-absolute-mean normalization downweights transient high amplitudes; spectral whitening reduces spectral imbalance. Temporal weights can be tuned to the earthquake frequency band.
-
-Daily station-pair cross-correlations are stacked into longer records. Frequency–time analysis extracts group and phase dispersion; phase-matched filtering helps isolate coherent arrivals.
-
-Conceptually, stacking combines repeated estimates of an interstation response, while dispersion analysis examines how propagation varies with frequency. Because normalization changes waveform amplitudes nonlinearly, processing order and parameter choices form part of the measurement definition.
-
-### Evaluation techniques
-
-The authors compare alternative normalization schemes, spectral signal-to-noise ratios, earthquake waveforms, and measurements along similar paths. Seasonal three-month stacks test stability under changing ambient-noise illumination; variation among acceptable dispersion curves estimates measurement error.
-
-This validation asks whether a result survives changes in observation conditions. Repeatability provides evidence about measurement stability, while comparisons with other paths and earthquake records supply complementary checks.
-
-### Results
-
-Running-absolute-mean normalization provides effective earthquake suppression with adaptable weighting. Reliable group-speed measurements generally require SNR above 10 and interstation spacing of at least three wavelengths. Seasonal variability supports empirical error estimates; SNR-based proxies help when records are too short for temporal subsetting.
-
-The main outcome is a reproducible measurement and quality-control strategy rather than a single predictive score. Thresholds depend on noise conditions and available record length. At low SNR, inferred errors rise nonlinearly, emphasizing the need to assess the stability of dispersion measurements as well as correlation amplitude.
+- **Research question:** Reliable ambient-noise surface-wave dispersion and measurement uncertainty
+- **Data sources:** Broadband records from North America, Europe, New Zealand; [IRIS](https://ds.iris.edu/ds/nodes/dmc/), [ORFEUS](https://www.orfeus-eu.org/data/), [GeoNet](https://www.geonet.org.nz/data/types/seismic_waveforms)
+- **Method:** Instrument correction, temporal normalization, spectral whitening; daily correlation and stacking; frequency–time/phase-matched dispersion analysis
+- **Evaluation:** Alternative processing, signal-to-noise, earthquake/path comparisons, seasonal repeatability
+- **Key result:** Practical quality-control workflow; seasonal variability as an empirical uncertainty estimate
+- **Code:** No repository identified in article
+- **Takeaways:** Seismic preprocessing, stack selection, and repeatability-based error assessment
+- **Limitations:** Dispersion rather than dv/v–moisture inference; thresholds depend on noise/path conditions; repeatability does not capture all systematic error
