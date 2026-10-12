@@ -11,7 +11,8 @@ Run from the repository root in the Pixi environment (standard library only):
         Run offline downloader tests.
 
 Edit the constants below to change the collection, track/frame pairs, inclusive
-UTC acquisition dates, or destination. Downloads cover the entire frame on its
+UTC acquisition dates; --output-dir sets the destination (default: data/nisar).
+Downloads cover the entire frame on its
 native EASE-Grid 2.0 (EPSG:6933); there is no spatial subset or resampling.
 Original files retain combined and available individual-algorithm soil moisture
 and uncertainties (m^3/m^3), integer flags, fill values, and embedded metadata.
@@ -35,28 +36,24 @@ Sources:
 """
 
 import argparse
-from dataclasses import dataclass
-from datetime import datetime, timedelta, timezone
-import hashlib
+from datetime import timedelta
 from http.client import HTTPException
-from http.cookiejar import CookieJar
 import json
-import os
 from pathlib import Path
-import re
 import ssl
 import sys
 from urllib.error import HTTPError, URLError
-from urllib.parse import urlencode, urlparse
-from urllib.request import (
-    HTTPBasicAuthHandler, HTTPCookieProcessor, HTTPPasswordMgrWithDefaultRealm,
-    Request, build_opener, urlopen,
-)
+from urllib.parse import urlencode
+from urllib.request import Request, urlopen
 
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
-from utils.download_utils import DownloadStats, copy_response, publish_file, utc_date_bounds
+sys.path.insert(0, str(ROOT / "src"))
+from ingest.downloads import utc_date_bounds
+from utils.download_stats import DownloadStats
+from nisar.catalog import (CMR_URL, TIMEOUT_SECONDS, parse_granule as parse_catalog_granule,
+                           earthdata_opener, download_granule)
 
 
 COLLECTION = "NISAR_L3_SME2_PROVISIONAL_V1"
@@ -64,26 +61,7 @@ TRACK_FRAMES = ((143, 65),)
 START_DATE = "2026-06-24"
 END_DATE = "2026-09-16"  # Inclusive, UTC.
 OUTPUT_DIR = ROOT / "data/nisar"
-CMR_URL = "https://cmr.earthdata.nasa.gov/search/granules.umm_json"
-EARTHDATA_URL = "https://urs.earthdata.nasa.gov"
-DOWNLOAD_HOST = "nisar.asf.earthdatacloud.nasa.gov"
 PAGE_SIZE = 100
-TIMEOUT_SECONDS = 120
-CHUNK_BYTES = 1024 * 1024
-HDF5_SIGNATURE = b"\x89HDF\r\n\x1a\n"
-
-
-@dataclass(frozen=True)
-class Granule:
-    """Catalog identity and integrity information for one original acquisition."""
-
-    name: str
-    start: datetime
-    track: int
-    frame: int
-    url: str
-    checksum_algorithm: str
-    checksum: str
 
 
 def date_bounds():
@@ -99,41 +77,11 @@ def fetch_json(address):
 
 
 def parse_granule(item, track_frame):
-    """Validate catalog filters and select the primary HDF5, excluding QA sidecars."""
-    record = item["umm"]
-    if record["CollectionReference"]["ShortName"] != COLLECTION:
-        raise ValueError("CMR returned an unexpected collection")
-    attributes = {a["Name"]: a["Values"] for a in record["AdditionalAttributes"]}
-    pair = (int(attributes["TRACK_NUMBER"][0]), int(attributes["FRAME_NUMBER"][0]))
-    if pair != track_frame:
+    """Apply this legacy workflow's track/frame and UTC date selection."""
+    granule = parse_catalog_granule(item, COLLECTION, *date_bounds())
+    if (granule.track, granule.frame) != track_frame:
         raise ValueError("CMR returned an unexpected track/frame")
-    start = datetime.fromisoformat(
-        record["TemporalExtent"]["RangeDateTime"]["BeginningDateTime"].replace("Z", "+00:00"))
-    if start.tzinfo is None:
-        raise ValueError("CMR acquisition time is missing its timezone")
-    start = start.astimezone(timezone.utc)
-    lower, upper = date_bounds()
-    if not lower <= start < upper:
-        raise ValueError("CMR returned an acquisition outside the requested UTC dates")
-    name = record["GranuleUR"]
-    if not re.fullmatch(r"NISAR_[A-Za-z0-9_]+", name):
-        raise ValueError("Unexpected granule filename")
-    filename = name + ".h5"
-    links = [u["URL"] for u in record["RelatedUrls"]
-             if u["Type"] == "GET DATA"
-             and urlparse(u["URL"]).scheme == "https"
-             and urlparse(u["URL"]).hostname == DOWNLOAD_HOST
-             and Path(urlparse(u["URL"]).path).name == filename]
-    files = [f for f in record["DataGranule"]["ArchiveAndDistributionInformation"]
-             if f["Name"] == filename]
-    if len(links) != 1 or len(files) != 1:
-        raise ValueError(f"Missing or ambiguous primary HDF5 product: {name}")
-    checksum = files[0]["Checksum"]
-    algorithm = checksum["Algorithm"].lower().replace("-", "")
-    digest = hashlib.new(algorithm)
-    if not re.fullmatch(r"[0-9a-fA-F]{" + str(digest.digest_size * 2) + r"}", checksum["Value"]):
-        raise ValueError(f"Invalid archive checksum: {name}")
-    return Granule(filename, start, *pair, links[0], algorithm, checksum["Value"].lower())
+    return granule
 
 
 def search_granules(get_json=fetch_json):
@@ -182,43 +130,13 @@ def search_granules(get_json=fetch_json):
     return sorted(found.values(), key=lambda g: (g.start, g.track, g.frame, g.name))
 
 
-def earthdata_opener():
-    """Use NASA's cookie-based login flow, with basic credentials scoped to URS."""
-    username = os.environ.get("EARTHDATA_USER")
-    password = os.environ.get("EARTHDATA_PASS")
-    if not username or not password:
-        raise ValueError("Export EARTHDATA_USER and EARTHDATA_PASS before running the script")
-    passwords = HTTPPasswordMgrWithDefaultRealm()
-    passwords.add_password(None, EARTHDATA_URL, username, password)
-    return build_opener(HTTPBasicAuthHandler(passwords), HTTPCookieProcessor(CookieJar()))
-
-
-def verify_file(path, granule):
-    """Check HDF5 signature and the archive checksum, streaming bounded chunks."""
-    digest = hashlib.new(granule.checksum_algorithm)
-    with path.open("rb") as source:
-        if source.read(len(HDF5_SIGNATURE)) != HDF5_SIGNATURE:
-            raise ValueError(f"Not an HDF5 product: {path.name}")
-        source.seek(0)
-        while chunk := source.read(CHUNK_BYTES):
-            digest.update(chunk)
-    if digest.hexdigest() != granule.checksum:
-        raise ValueError(f"Archive checksum mismatch: {path.name}")
-
-
-def download_granule(granule, opener, output_dir, stats=None):
-    """Publish only a complete, verified original; never replace an existing file."""
-    status = publish_file(output_dir / granule.name,
-                          lambda out: copy_response(granule.url, out, stats, opener),
-                          lambda path: verify_file(path, granule))
-    return "verified existing" if status == "validated existing" else status
-
-
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--list-only", action="store_true",
                         help="List catalog matches without authentication or file writes")
+    parser.add_argument("--output-dir", type=Path, default=OUTPUT_DIR,
+                        help="Directory for downloaded HDF5 products (default: data/nisar)")
     args = parser.parse_args(argv)
     stats = DownloadStats()
     try:
@@ -236,9 +154,9 @@ def main(argv=None):
         for index, granule in enumerate(granules, 1):
             print(f"[{index}/{len(granules)}] {granule.start.date()}: verifying/downloading",
                   flush=True)
-            status = download_granule(granule, opener, OUTPUT_DIR, stats)
+            status = download_granule(granule, opener, args.output_dir, stats)
             print(f"  {status}: {granule.name}", flush=True)
-        print(f"Original HDF5 products stored in {OUTPUT_DIR}", flush=True)
+        print(f"Original HDF5 products stored in {args.output_dir}", flush=True)
         return 0
     except HTTPError as error:
         # Do not log redirect URLs, which can contain temporary authentication tokens.

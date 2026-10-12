@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NISAR soil moisture</title>
+  <link rel="stylesheet" href="__LEAFLET_CSS__" integrity="__LEAFLET_CSS_INTEGRITY__" crossorigin="">
+  <style>
+    :root { color-scheme:light; font:14px/1.5 system-ui,sans-serif; color:#263a36; background:white; }
+    * { box-sizing:border-box; }
+    body { margin:0; }
+    main { display:grid; grid-template-columns:minmax(0,1fr) 310px; height:100vh; }
+    .map-wrap { position:relative; min-width:0; }
+    #map { width:100%; height:100%; background:#e5ebdd; }
+    aside { overflow:auto; padding:24px 20px; border-left:1px solid #d5dfd9; }
+    h1 { font-size:23px; line-height:1.2; margin:4px 0 6px; }
+    h2 { font-size:14px; margin:24px 0 8px; }
+    p { margin:6px 0 12px; }
+    .eyebrow { color:#61756d; text-transform:uppercase; font-size:10px; letter-spacing:.12em; font-weight:700; }
+    .muted { color:#61756d; font-size:12px; }
+    select { width:100%; margin:7px 0 16px; padding:10px 8px; border:1px solid #b9c9bf; border-radius:5px; background:white; color:inherit; font:inherit; }
+    input[type=range] { width:100%; accent-color:#147e78; }
+    .timebar { position:absolute; z-index:650; left:18px; right:18px; bottom:30px; max-width:760px; margin:auto; padding:15px 18px 12px; background:#ffffffef; border:1px solid #c8d5cf; border-radius:7px; box-shadow:0 3px 14px #19383024; }
+    .time-heading { display:flex; justify-content:space-between; align-items:center; gap:12px; }
+    .time-heading strong { font-size:16px; }
+    .ends { display:flex; justify-content:space-between; font-size:11px; color:#61756d; }
+    #status { margin-top:7px; font-size:12px; min-height:18px; }
+    #status[data-error=true] { color:#9d322a; }
+    .scale { position:relative; height:17px; border:1px solid #40544b; margin:9px 10px 2px; }
+    .scale::after { content:""; position:absolute; left:100%; top:-1px; border-top:8.5px solid transparent; border-bottom:8.5px solid transparent; border-left:10px solid var(--max-color); }
+    .scale[data-extend-min=true]::before { content:""; position:absolute; right:100%; top:-1px; border-top:8.5px solid transparent; border-bottom:8.5px solid transparent; border-right:10px solid var(--min-color); }
+    .flag-toggle { display:flex; gap:8px; align-items:center; font-size:13px; }
+    .step-buttons { display:flex; gap:8px; margin-top:6px; }
+    button { padding:4px 10px; color:inherit; background:white; border:1px solid #b9c9bf; border-radius:4px; cursor:pointer; }
+    .ticks { display:flex; justify-content:space-between; font-size:12px; }
+    .key { display:flex; align-items:center; gap:8px; margin:8px 0; font-size:12px; }
+    .swatch { width:23px; height:12px; display:inline-block; flex:none; }
+    .missing { background:var(--missing-color); }
+    .odd { border:2px solid var(--odd-color); }
+    .domain { border-top:2px dashed __BOUNDARY_COLOR__; height:0; }
+    details { border-top:1px solid #dce3db; padding-top:12px; margin-top:17px; }
+    summary { cursor:pointer; font-size:12px; font-weight:650; }
+    .granule { margin:12px 0; padding-top:8px; border-top:1px solid #edf0eb; font-size:11px; overflow-wrap:anywhere; }
+    .granule code { display:block; margin-top:5px; font-size:10px; }
+    a { color:#126d70; }
+    canvas.sme2-raster { pointer-events:none; position:absolute; }
+    @media (max-width:720px) {
+      main { grid-template-columns:1fr; height:auto; }
+      .map-wrap { height:72vh; min-height:410px; }
+      aside { border-left:0; border-top:1px solid #d5dfd9; padding:18px; }
+      .timebar { left:9px; right:9px; bottom:25px; padding:10px; }
+      .time-heading strong { font-size:13px; }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <div class="map-wrap">
+    <div id="map" aria-label="NISAR soil moisture within the viewing box"></div>
+    <section class="timebar" aria-label="Acquisition time">
+      <div class="time-heading"><strong id="time-label">Loading granules…</strong><span class="muted" id="frame-count"></span></div>
+      <label class="muted" for="time-slider">Acquisition group · UTC</label>
+      <input id="time-slider" type="range" min="0" max="0" step="1" value="0" aria-describedby="time-label">
+      <div class="ends"><span id="first-date"></span><span id="last-date"></span></div>
+      <div class="step-buttons"><button id="previous" type="button">Previous</button><button id="next" type="button">Next</button></div>
+      <div id="status" role="status" aria-live="polite"></div>
+    </section>
+  </div>
+  <aside>
+    <div class="eyebrow">NISAR · soil moisture</div>
+    <h1 id="map-title">NISAR soil moisture</h1>
+    <p class="muted">Provisional SME2 · native soil-moisture cells</p>
+    <h2><label for="value-select">Displayed value</label></h2>
+    <select id="value-select"></select>
+    <label class="flag-toggle"><input id="flag-toggle" type="checkbox" checked> Show odd candidate flags</label>
+    <h2 id="legend-title"></h2>
+    <div class="scale" id="color-scale"></div>
+    <div class="ticks"><span id="scale-min"></span><span id="scale-middle"></span><span id="scale-max"></span></div>
+    <p class="muted">m³/m³ · values outside the scale use endpoint colors</p>
+    <div class="key"><span class="swatch missing"></span>Missing value / algorithm unavailable</div>
+    <div id="flag-key">
+      <div class="key"><span class="swatch odd"></span>Candidate retrieval not recommended · odd flag</div>
+      <p class="muted">Red outlines mark bit 0 = 1 of the selected algorithm’s candidate flag. Even and missing flags have no outline; no outline alone does not establish valid data.</p>
+    </div>
+    <div class="key"><span class="swatch domain"></span>Requested bounding box</div>
+    <p class="muted" id="coverage"></p>
+    <details open><summary id="source-count">Source granules</summary><div id="sources"></div></details>
+    <details><summary>About these observations</summary>
+      <p class="muted" id="combine-rule">Each time step displays one qualifying acquisition group. The six views share the same sources and bounding box.</p>
+      <p class="muted">The checkbox shows odd candidate flags for the selected algorithm. Outlines can appear over missing values and do not filter the data. Recommended cells have a numeric value and a valid even candidate flag. Reported uncertainties are displayed without recalibration.</p>
+      <p class="muted" id="provenance"></p>
+    </details>
+  </aside>
+</main>
+<noscript>This map requires JavaScript.</noscript>
+<script id="map-data" type="application/json">__MAP_DATA__</script>
+<script src="__LEAFLET_JS__" integrity="__LEAFLET_JS_INTEGRITY__" crossorigin=""></script>
+<script>__MAP_APP__</script>
+</body>
+</html>

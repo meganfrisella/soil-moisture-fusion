@@ -1,4 +1,4 @@
-"""Shared UTC selection, transfer statistics, and atomic download storage.
+"""Shared UTC selection, streaming transfers and atomic download storage.
 
 Imported by the pull scripts; no standalone entry point. Run offline checks with:
     pixi run python -m unittest discover -s tests -p 'test_data_downloads.py'
@@ -17,42 +17,6 @@ TIMEOUT_SECONDS = 120
 CHUNK_BYTES = 1024 * 1024
 
 
-def format_bytes(count):
-    """Display binary units while retaining exact byte counts in the summary."""
-    value = float(count)
-    for unit in ("B", "KiB", "MiB", "GiB", "TiB"):
-        if value < 1024 or unit == "TiB":
-            return f"{value:.2f} {unit}"
-        value /= 1024
-
-
-class DownloadStats:
-    """Measure product response bodies, excluding catalog requests and cached files.
-
-    Transfer time includes connection/authentication waits and streaming writes.
-    Run time also includes discovery, validation, and local processing. Bytes
-    include received partial/invalid bodies, before any CSV row selection, but
-    exclude HTTP/TLS overhead.
-    """
-
-    def __init__(self):
-        self.started = perf_counter()
-        self.bytes_received = 0
-        self.transfer_seconds = 0.0
-
-    def report(self):
-        """Print totals even for failed transfers or runs using only existing files."""
-        elapsed = perf_counter() - self.started
-        print("\nDownload statistics:", flush=True)
-        print(f"  Total downloaded: {format_bytes(self.bytes_received)} "
-              f"({self.bytes_received:,} bytes of response bodies)")
-        speed = (format_bytes(self.bytes_received / self.transfer_seconds) + "/s"
-                 if self.bytes_received and self.transfer_seconds > 0 else "N/A (no bytes transferred)")
-        print(f"  Average download speed: {speed}")
-        print(f"  Total download duration: {self.transfer_seconds:.3f} s (requests and streaming)")
-        print(f"  Total run duration: {elapsed:.3f} s (including discovery and validation)", flush=True)
-
-
 def utc_date_bounds(start_date, end_date):
     """Inclusive UTC calendar dates become a half-open datetime interval."""
     start = datetime.combine(date.fromisoformat(start_date), datetime.min.time(), timezone.utc)
@@ -64,7 +28,11 @@ def utc_date_bounds(start_date, end_date):
 
 
 def copy_response(address, destination, stats=None, opener=None):
-    """Stream an HTTPS response without changing bytes; reject incomplete transfers."""
+    """Stream original bytes and reject incomplete transfers.
+
+    An optional caller-owned stats object accumulates bytes_received and
+    transfer_seconds; this library does not format or print progress.
+    """
     started = perf_counter()
     open_url = opener.open if opener is not None else urlopen
     try:
