@@ -1,5 +1,5 @@
 {
-  "schema": "nisar-sme2-statistics-v1",
+  "schema": "nisar-sme2-statistics-v2",
   "bounds_wgs84": {
     "west": -122.137915,
     "south": 47.170149,
@@ -8,28 +8,36 @@
   },
   "area_km2": 159.10856539237793,
   "area_crs": "EPSG:6933",
-  "native_pixel_centers": 3916,
   "min_numeric_percent": 80.0,
-  "coverage_rule": "Native centers inside or on the box; strictly greater than threshold in at least one candidate",
+  "nisar_combine_window_minutes": 10.0,
+  "coverage_rule": "Strictly greater than threshold in at least one candidate algorithm; all intersecting cells in the full box count equally",
   "recommended_rule": "Finite soil moisture and valid even candidate retrievalQualityFlag",
-  "mean_weighting": "Equal weight per selected granule; missing candidates count as zero coverage",
-  "coverage_denominator_cells": 3916,
-  "selected_granules": 44,
+  "mean_weighting": "Equal weight per selected acquisition frame; missing candidates count as zero coverage",
+  "temporal_interval_rule": "Any finite moisture, regardless of flags; unique source acquisition-start UTC dates per cell; mean consecutive date gap per cell, then equal-weight mean over cells with at least two dates; no extrapolation beyond each cell's first/last observation",
+  "coverage_denominator_cells": 4095,
+  "selected_granules": 47,
+  "selected_frames": 44,
   "distinct_utc_dates": 36,
   "acquisition_start_utc": "2025-11-10T03:18:48+00:00",
   "acquisition_end_utc": "2026-10-07T13:04:01+00:00",
   "algorithms": {
     "PMI": {
-      "mean_numeric_percent": 73.6506407280156,
-      "mean_recommended_percent": 23.296615284613242
+      "mean_numeric_percent": 73.64135864135864,
+      "mean_recommended_percent": 22.44921744921745,
+      "mean_temporal_interval_days": 10.924053186105361,
+      "temporal_interval_cells": 4025
     },
     "TSR": {
-      "mean_numeric_percent": 82.65507475160182,
-      "mean_recommended_percent": 15.535332899990713
+      "mean_numeric_percent": 82.65401265401266,
+      "mean_recommended_percent": 14.96947496947497,
+      "mean_temporal_interval_days": 10.23333333333333,
+      "temporal_interval_cells": 4028
     },
     "DSG": {
-      "mean_numeric_percent": 98.21942613055994,
-      "mean_recommended_percent": 21.759796638499395
+      "mean_numeric_percent": 98.24508824508824,
+      "mean_recommended_percent": 20.974580974580974,
+      "mean_temporal_interval_days": 9.457142857142857,
+      "temporal_interval_cells": 4026
     }
   },
   "selected_granule_names": [
@@ -56,12 +64,15 @@
     "NISAR_L3_PR_SME2_023_172_D_065_4005_DHDH_A_20260626T031850_20260626T031926_P05023_N_F_J_001.h5",
     "NISAR_L3_PR_SME2_024_005_A_026_4005_DHDH_A_20260626T125544_20260626T125619_P05023_N_F_J_001.h5",
     "NISAR_L3_PR_SME2_024_106_A_025_4005_DHDH_A_20260703T130329_20260703T130404_P05023_N_F_J_001.h5",
+    "NISAR_L3_PR_SME2_024_172_D_064_4005_DHDH_A_20260708T031816_20260708T031851_P05023_N_F_J_001.h5",
     "NISAR_L3_PR_SME2_024_172_D_065_4005_DHDH_A_20260708T031850_20260708T031925_P05023_N_F_J_001.h5",
     "NISAR_L3_PR_SME2_025_005_A_026_4005_DHDH_A_20260708T125543_20260708T125618_P05023_N_F_J_001.h5",
     "NISAR_L3_PR_SME2_025_106_A_025_4005_DHDH_A_20260715T130329_20260715T130404_P05023_N_F_J_001.h5",
+    "NISAR_L3_PR_SME2_025_172_D_064_4005_DHDH_A_20260720T031815_20260720T031850_P05023_N_F_J_001.h5",
     "NISAR_L3_PR_SME2_025_172_D_065_4005_DHDH_A_20260720T031849_20260720T031924_P05023_N_F_J_001.h5",
     "NISAR_L3_PR_SME2_026_005_A_026_4005_DHDH_A_20260720T125542_20260720T125618_P05023_N_F_J_001.h5",
     "NISAR_L3_PR_SME2_026_106_A_025_4005_DHDH_A_20260727T130328_20260727T130403_P05023_N_F_J_001.h5",
+    "NISAR_L3_PR_SME2_027_172_D_064_4005_DHDH_A_20260813T031814_20260813T031849_P05023_N_F_J_001.h5",
     "NISAR_L3_PR_SME2_027_172_D_065_4005_DHDH_A_20260813T031848_20260813T031923_P05023_N_F_J_001.h5",
     "NISAR_L3_PR_SME2_028_005_A_026_4005_DHDH_A_20260813T125541_20260813T125616_P05023_N_F_J_001.h5",
     "NISAR_L3_PR_SME2_028_106_A_025_4005_DHDH_A_20260820T130327_20260820T130402_P05023_N_F_J_001.h5",
@@ -81,9 +92,17 @@
   "provenance": {
     "catalog_query": "https://cmr.earthdata.nasa.gov/search/granules.umm_json?short_name=NISAR_L3_SME2_PROVISIONAL_%2A&options%5Bshort_name%5D%5Bpattern%5D=true&bounding_box=-122.137915%2C47.170149%2C-121.951705%2C47.271621&page_size=1000&sort_key%5B%5D=start_date",
     "catalog_granules": 56,
-    "catalog_retrieved_at_utc": "2026-10-12T05:06:12.459049+00:00",
+    "catalog_retrieved_at_utc": "2026-10-13T15:38:19.088216+00:00",
+    "min_numeric_percent": 80.0,
+    "nisar_combine_window_minutes": 10.0,
+    "combine_rule": "Same track; inclusive first-to-last UTC acquisition-start window; no chaining; zero disables combining",
+    "overlap_rule": "Earliest finite moisture per algorithm/cell, with its uncertainty and flag; filename breaks equal-start ties; if all moisture is missing, earliest nonempty tuple",
+    "selection_rule": "Combine before coverage filtering; qualifying groups ordered by UTC acquisition start and filename",
+    "coverage_rule": "Strictly greater than threshold in at least one candidate algorithm; all intersecting cells in the full box count equally",
+    "qualifying_granules": 47,
+    "qualifying_frames": 44,
     "archive_checksums_verified": true,
-    "selected_checksums": {
+    "source_checksums": {
       "NISAR_L3_PR_SME2_004_172_D_065_4005_DHDH_A_20251110T031848_20251110T031923_P05023_N_F_J_001.h5": {
         "algorithm": "md5",
         "value": "b29bc08c9a2534cdbee7e8a745faa7c7"
@@ -176,6 +195,10 @@
         "algorithm": "md5",
         "value": "0d1f064674d342901a4f2cbdf7b8deef"
       },
+      "NISAR_L3_PR_SME2_024_172_D_064_4005_DHDH_A_20260708T031816_20260708T031851_P05023_N_F_J_001.h5": {
+        "algorithm": "md5",
+        "value": "83d109d16c89d306a7480ff6224c48a9"
+      },
       "NISAR_L3_PR_SME2_024_172_D_065_4005_DHDH_A_20260708T031850_20260708T031925_P05023_N_F_J_001.h5": {
         "algorithm": "md5",
         "value": "e61768e0f8f3c672fb0e9eac499e9440"
@@ -188,6 +211,10 @@
         "algorithm": "md5",
         "value": "2fd49721006f9d712baf2e649b0e9b41"
       },
+      "NISAR_L3_PR_SME2_025_172_D_064_4005_DHDH_A_20260720T031815_20260720T031850_P05023_N_F_J_001.h5": {
+        "algorithm": "md5",
+        "value": "4eaca4cbafb77ca2249f181739155cb8"
+      },
       "NISAR_L3_PR_SME2_025_172_D_065_4005_DHDH_A_20260720T031849_20260720T031924_P05023_N_F_J_001.h5": {
         "algorithm": "md5",
         "value": "13b69873cfa531cc323cd0cf8d472813"
@@ -199,6 +226,10 @@
       "NISAR_L3_PR_SME2_026_106_A_025_4005_DHDH_A_20260727T130328_20260727T130403_P05023_N_F_J_001.h5": {
         "algorithm": "md5",
         "value": "b7088eb505ae08432f3b0417a51b6f7c"
+      },
+      "NISAR_L3_PR_SME2_027_172_D_064_4005_DHDH_A_20260813T031814_20260813T031849_P05023_N_F_J_001.h5": {
+        "algorithm": "md5",
+        "value": "865c10cbf4331973b922e449951a98b8"
       },
       "NISAR_L3_PR_SME2_027_172_D_065_4005_DHDH_A_20260813T031848_20260813T031923_P05023_N_F_J_001.h5": {
         "algorithm": "md5",

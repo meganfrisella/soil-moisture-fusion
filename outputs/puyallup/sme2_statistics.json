@@ -1,5 +1,5 @@
 {
-  "schema": "nisar-sme2-statistics-v1",
+  "schema": "nisar-sme2-statistics-v2",
   "bounds_wgs84": {
     "west": -122.318983,
     "south": 47.109597,
@@ -8,28 +8,36 @@
   },
   "area_km2": 159.99968547461182,
   "area_crs": "EPSG:6933",
-  "native_pixel_centers": 3969,
   "min_numeric_percent": 80.0,
-  "coverage_rule": "Native centers inside or on the box; strictly greater than threshold in at least one candidate",
+  "nisar_combine_window_minutes": 10.0,
+  "coverage_rule": "Strictly greater than threshold in at least one candidate algorithm; all intersecting cells in the full box count equally",
   "recommended_rule": "Finite soil moisture and valid even candidate retrievalQualityFlag",
-  "mean_weighting": "Equal weight per selected granule; missing candidates count as zero coverage",
-  "coverage_denominator_cells": 3969,
+  "mean_weighting": "Equal weight per selected acquisition frame; missing candidates count as zero coverage",
+  "temporal_interval_rule": "Any finite moisture, regardless of flags; unique source acquisition-start UTC dates per cell; mean consecutive date gap per cell, then equal-weight mean over cells with at least two dates; no extrapolation beyond each cell's first/last observation",
+  "coverage_denominator_cells": 4096,
   "selected_granules": 36,
+  "selected_frames": 36,
   "distinct_utc_dates": 36,
   "acquisition_start_utc": "2025-11-10T03:18:48+00:00",
   "acquisition_end_utc": "2026-10-07T13:04:01+00:00",
   "algorithms": {
     "PMI": {
-      "mean_numeric_percent": 63.3198958595784,
-      "mean_recommended_percent": 6.438789507572577
+      "mean_numeric_percent": 63.4033203125,
+      "mean_recommended_percent": 6.301540798611111,
+      "mean_temporal_interval_days": 10.9586454119888,
+      "temporal_interval_cells": 3357
     },
     "TSR": {
-      "mean_numeric_percent": 70.79379076733574,
-      "mean_recommended_percent": 5.404383975812547
+      "mean_numeric_percent": 70.91132269965277,
+      "mean_recommended_percent": 5.289713541666667,
+      "mean_temporal_interval_days": 10.233333333333333,
+      "temporal_interval_cells": 3373
     },
     "DSG": {
-      "mean_numeric_percent": 81.95739201030206,
-      "mean_recommended_percent": 7.531284118585706
+      "mean_numeric_percent": 82.05295138888889,
+      "mean_recommended_percent": 7.367621527777778,
+      "mean_temporal_interval_days": 9.457505926615543,
+      "temporal_interval_cells": 3361
     }
   },
   "selected_granule_names": [
@@ -73,9 +81,17 @@
   "provenance": {
     "catalog_query": "https://cmr.earthdata.nasa.gov/search/granules.umm_json?short_name=NISAR_L3_SME2_PROVISIONAL_%2A&options%5Bshort_name%5D%5Bpattern%5D=true&bounding_box=-122.318983%2C47.109597%2C-122.187885%2C47.254429&page_size=1000&sort_key%5B%5D=start_date",
     "catalog_granules": 53,
-    "catalog_retrieved_at_utc": "2026-10-12T05:06:09.546540+00:00",
+    "catalog_retrieved_at_utc": "2026-10-13T15:39:13.351273+00:00",
+    "min_numeric_percent": 80.0,
+    "nisar_combine_window_minutes": 10.0,
+    "combine_rule": "Same track; inclusive first-to-last UTC acquisition-start window; no chaining; zero disables combining",
+    "overlap_rule": "Earliest finite moisture per algorithm/cell, with its uncertainty and flag; filename breaks equal-start ties; if all moisture is missing, earliest nonempty tuple",
+    "selection_rule": "Combine before coverage filtering; qualifying groups ordered by UTC acquisition start and filename",
+    "coverage_rule": "Strictly greater than threshold in at least one candidate algorithm; all intersecting cells in the full box count equally",
+    "qualifying_granules": 36,
+    "qualifying_frames": 36,
     "archive_checksums_verified": true,
-    "selected_checksums": {
+    "source_checksums": {
       "NISAR_L3_PR_SME2_004_172_D_065_4005_DHDH_A_20251110T031848_20251110T031923_P05023_N_F_J_001.h5": {
         "algorithm": "md5",
         "value": "b29bc08c9a2534cdbee7e8a745faa7c7"

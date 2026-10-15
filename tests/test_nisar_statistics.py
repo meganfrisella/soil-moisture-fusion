@@ -28,12 +28,43 @@ def frame(name, start, values, flags):
         'metadata': {'source_granules': [{'granule': name, 'zeroDopplerStartTime': start,
                                          'zeroDopplerEndTime': start}]},
         'data': {a: {'soilMoisture': np.array(values.get(a, [np.nan] * 4)),
+                     'source_day': np.where(np.isfinite(values.get(a, [np.nan] * 4)),
+                                            statistics.acquisition_time(start).date().toordinal(), 0),
                      'retrievalQualityFlag': np.array(flags.get(a, [np.nan] * 4))}
                  for a in ALGORITHMS},
     }
 
 
 class StatisticsTests(unittest.TestCase):
+    def test_per_cell_intervals_deduplicate_dates_and_weight_cells_equally(self):
+        """Deduplicate same-day passes; include odd/missing flags; exclude singletons and masked cells."""
+        frames = [
+            frame('a', '2026-01-01T01:00:00Z', {'PMI': [.2, .2, .2, .2]}, {'PMI': [1] * 4}),
+            frame('b', '2026-01-01T23:00:00Z', {'PMI': [.2, .2, .2, .2]}, {}),
+            frame('c', '2026-01-03T00:00:00Z', {'PMI': [.2, np.nan, np.nan, .2]}, {}),
+            frame('d', '2026-01-07T00:00:00Z', {'PMI': [.2, .2, np.nan, .2]}, {}),
+        ]
+        result = statistics.summarize_frames(reversed(frames), np.array([True, True, True, False]))
+        # Cell means: (2 + 4)/2 = 3 days, and 6 days; equal-cell mean = 4.5.
+        self.assertEqual(result['algorithms']['PMI']['mean_temporal_interval_days'], 4.5)
+        self.assertEqual(result['algorithms']['PMI']['temporal_interval_cells'], 2)
+        self.assertIsNone(result['algorithms']['TSR']['mean_temporal_interval_days'])
+
+    def test_combined_midnight_keeps_each_cells_source_date(self):
+        """Retain the winning source date across midnight and avoid counting discarded overlap twice."""
+        with tempfile.TemporaryDirectory() as folder:
+            paths = [Path(folder) / f'{i}.h5' for i in range(3)]
+            write_granule(paths[0], (0, 1, 2), '2026-01-01T23:55:00')
+            write_granule(paths[1], (2, 3, 4), '2026-01-02T00:05:00')
+            write_granule(paths[2], (0, 1, 2, 3, 4), '2026-01-04T00:00:00')
+            with h5py.File(paths[0]) as f:
+                layout = observations.window_layout(small_box(), f)
+            frames = GranuleFrames(paths, layout, 80, 10)
+            result = statistics.summarize_frames(frames, layout['mask'])
+            # Nine cells start Jan 1; six start Jan 2; all return Jan 4.
+            self.assertEqual(result['algorithms']['PMI']['mean_temporal_interval_days'], 2.6)
+            self.assertEqual(result['algorithms']['PMI']['temporal_interval_cells'], 15)
+
     def test_intersecting_denominator_and_cached_cli_report(self):
         """Count partial edge cells and missing cells beyond a granule exactly as the viewer does."""
         west, south = geometry.INVERSE.transform(-450, -250)

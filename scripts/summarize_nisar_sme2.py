@@ -22,10 +22,15 @@ finite moisture and a valid even candidate flag; combined flags are unused.
 acquisition starts within an inclusive first-to-last window are combined before
 filtering, without chaining. Earliest finite moisture wins with its uncertainty
 and candidate flag; filename breaks equal-start ties. Each selected combined
-frame has equal weight in the means; missing algorithms count as zero coverage.
+frame has equal weight in coverage means; missing algorithms count as zero coverage.
 Counts distinguish original source granules from selected frames. UTC dates and
 span include all selected source acquisitions. No resampling, averaging of
 measurements, accuracy assessment or uncertainty calibration is performed.
+Temporal intervals use any finite moisture, separately for PMI/TSR/DSG. Count
+each source acquisition-start UTC date once per cell. Average successive date
+gaps within each cell, then average equally over cells with at least two dates;
+report days and the number of eligible cells. No interval spans beyond a cell's
+first/last observation; quality flags do not filter this metric.
 The script prints its report and saves sme2_statistics.json in --output-dir.
 """
 
@@ -48,12 +53,31 @@ from nisar.quality import ALGORITHMS, cell_counts, qualifies
 from utils.download_stats import DownloadStats
 
 
+def summarize_intervals(days, total):
+    """Average per-cell UTC date gaps equally, excluding fewer than two observed dates."""
+    first = np.zeros(total, dtype=np.int32)
+    last = np.zeros(total, dtype=np.int32)
+    count = np.zeros(total, dtype=np.int32)
+    for day, packed in sorted(days.items()):
+        observed = np.unpackbits(packed, count=total).astype(bool)
+        first[observed & (count == 0)] = day
+        last[observed] = day
+        count[observed] += 1
+    eligible = count >= 2
+    means = (last[eligible] - first[eligible]) / (count[eligible] - 1)
+    return {
+        'mean_temporal_interval_days': float(means.mean()) if len(means) else None,
+        'temporal_interval_cells': int(eligible.sum()),
+    }
+
+
 def summarize_frames(frames, mask):
     """Average already-selected frames equally and count their original UTC acquisitions."""
     total = int(np.count_nonzero(mask))
     if not total:
         raise ValueError('The region contains no selected native cells')
     sums = {a: {'numeric': 0, 'recommended': 0} for a in ALGORITHMS}
+    observed_dates = {a: {} for a in ALGORITHMS}
     selected, dates, starts, ends = set(), set(), [], []
     selected_frames = 0
     for frame in frames:
@@ -71,11 +95,21 @@ def summarize_frames(frames, mask):
         for algorithm, count in counts.items():
             sums[algorithm]['numeric'] += count['numeric_cells']
             sums[algorithm]['recommended'] += count['recommended_cells']
+            arrays = frame['data'][algorithm]
+            numeric = np.isfinite(arrays['soilMoisture'][mask])
+            source_days = arrays['source_day'][mask]
+            for day in np.unique(source_days[numeric]):
+                packed = np.packbits(numeric & (source_days == day))
+                if day in observed_dates[algorithm]:
+                    observed_dates[algorithm][day] |= packed
+                else:
+                    observed_dates[algorithm][day] = packed
     denominator = total * selected_frames
     means = {
         algorithm: {
             'mean_numeric_percent': 100 * count['numeric'] / denominator if denominator else None,
             'mean_recommended_percent': 100 * count['recommended'] / denominator if denominator else None,
+            **summarize_intervals(observed_dates[algorithm], total),
         } for algorithm, count in sums.items()
     }
     return {
@@ -131,6 +165,9 @@ def main(argv=None):
             coverage_rule=provenance['coverage_rule'],
             recommended_rule='Finite soil moisture and valid even candidate retrievalQualityFlag',
             mean_weighting='Equal weight per selected acquisition frame; missing candidates count as zero coverage',
+            temporal_interval_rule='Any finite moisture, regardless of flags; unique source acquisition-start UTC dates per cell; '
+                                   'mean consecutive date gap per cell, then equal-weight mean over cells with at least two dates; '
+                                   'no extrapolation beyond each cell\'s first/last observation',
             **summary,
             provenance=provenance,
             download=dict(bytes=stats.bytes_received, seconds=stats.transfer_seconds),
@@ -149,10 +186,15 @@ def main(argv=None):
               f'{summary["distinct_utc_dates"]} distinct UTC dates')
         print(f'Acquisition span (UTC): {summary["acquisition_start_utc"]} — {summary["acquisition_end_utc"]}')
         for algorithm, coverage in summary['algorithms'].items():
-            numeric, recommended = coverage.values()
+            numeric = coverage['mean_numeric_percent']
+            recommended = coverage['mean_recommended_percent']
             description = (f'{numeric:.2f}% numeric; {recommended:.2f}% recommended'
                            if numeric is not None else 'n/a (no selected granules)')
             print(f'{algorithm}: {description}')
+            interval = coverage['mean_temporal_interval_days']
+            interval_text = f'{interval:.2f} days' if interval is not None else 'n/a'
+            print(f'  Mean per-cell interval: {interval_text}; '
+                  f'{coverage["temporal_interval_cells"]:,} cells with at least two UTC dates')
         print(f'Saved {output}', flush=True)
         return 0
     except HTTPError as error:

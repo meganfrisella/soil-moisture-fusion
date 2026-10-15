@@ -22,15 +22,21 @@
   "algorithms": {
     "PMI": {
       "mean_numeric_percent": 25.017850539978834,
-      "mean_recommended_percent": 16.380398496184945
+      "mean_recommended_percent": 16.380398496184945,
+      "mean_temporal_interval_days": 5.956740615273274,
+      "temporal_interval_cells": 1724463
     },
     "TSR": {
       "mean_numeric_percent": 29.745394363396883,
-      "mean_recommended_percent": 20.792265107323843
+      "mean_recommended_percent": 20.792265107323843,
+      "mean_temporal_interval_days": 5.720076599385218,
+      "temporal_interval_cells": 1728368
     },
     "DSG": {
       "mean_numeric_percent": 38.97403385582849,
-      "mean_recommended_percent": 26.242222631582433
+      "mean_recommended_percent": 26.242222631582433,
+      "mean_temporal_interval_days": 5.44102627298006,
+      "temporal_interval_cells": 1727171
     }
   },
   "selected_granule_names": [
@@ -744,5 +750,6 @@
   "download": {
     "bytes": 270532608,
     "seconds": 13.01152829208877
-  }
+  },
+  "temporal_interval_rule": "Any finite moisture, regardless of flags; unique source acquisition-start UTC dates per cell; mean consecutive date gap per cell, then equal-weight mean over cells with at least two dates; no extrapolation beyond each cell's first/last observation"
 }

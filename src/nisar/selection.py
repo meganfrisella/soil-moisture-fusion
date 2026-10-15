@@ -63,15 +63,19 @@ def read_combined_frame(paths, layout):
     uncertainty, so flags over missing moisture remain visible. No averaging,
     resampling, or uncertainty recalibration occurs. Source pixels count the
     union of cells supplying finite moisture across algorithms for each source.
+    Each candidate's source_day records its finite moisture's UTC acquisition
+    start as a Gregorian ordinal day (0 where moisture is missing).
     """
     combined, sources = None, []
     fields = ('soilMoisture', 'soilMoistureUncertainty', 'retrievalQualityFlag')
     for path in paths:
         frame = read_frame(path, layout)
+        day = acquisition_time(frame['metadata']['zeroDopplerStartTime']).date().toordinal()
         supplied = np.zeros(layout['mask'].shape, dtype=bool)
         for algorithm in ALGORITHMS:
             incoming = frame['data'][algorithm]
             finite = np.isfinite(incoming['soilMoisture'])
+            incoming['source_day'] = np.where(finite, day, 0).astype(np.int32)
             if combined is None:
                 supplied |= finite
                 continue
@@ -81,6 +85,7 @@ def read_combined_frame(paths, layout):
             take = take_numeric | empty
             for field in fields:
                 target[field][take] = incoming[field][take]
+            target['source_day'][take_numeric] = day
             target['available'] |= incoming['available']
             supplied |= take_numeric
         sources.append(dict(frame['metadata'], source_pixels=int((supplied & layout['mask']).sum())))
