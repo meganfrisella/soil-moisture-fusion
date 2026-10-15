@@ -1,7 +1,6 @@
 """Offline checks: pixi run python -m unittest discover -s tests -p 'test_gaia_map.py'."""
 
 import copy
-import importlib.util
 import json
 import shutil
 from pathlib import Path
@@ -14,9 +13,9 @@ from PIL import Image
 from pyproj import Transformer
 
 ROOT = Path(__file__).resolve().parents[1]
-SPEC = importlib.util.spec_from_file_location('gaia_map', ROOT / 'scripts/build_gaia_map.py')
-MAP = importlib.util.module_from_spec(SPEC)
-SPEC.loader.exec_module(MAP)
+sys.path[:0] = [str(ROOT / 'src'), str(ROOT / 'scripts')]
+from maps import station_map as MAP
+from maps import station_catalogs as catalogs
 from maps.preview import render_preview
 
 
@@ -42,14 +41,14 @@ class GaiaMapTests(unittest.TestCase):
         """Colocated SWE and moisture produce one marker; temperature alone is excluded."""
         st = dict(networkCode='SNTL', stationTriplet='1:WA:SNTL', name='Test', latitude=47.2,
                   longitude=-122, stationElements=[{'elementCode':code} for code in ('SMS','WTEQ')])
-        found = MAP.awdb_stations([st], ('SNTL','SCAN','SNLT'), 'https://example.org')
+        found = catalogs.awdb_stations([st], ('SNTL','SCAN','SNLT'), 'https://example.org')
         self.assertEqual(len(found), 1)
         self.assertEqual(found[0]['kind'], 'soil')
         self.assertIn('WTEQ', dict(found[0]['rows'])['Measurements'])
         st['stationElements'] = [{'elementCode':'WTEQ'}]
-        self.assertEqual(MAP.awdb_stations([st], ('SNTL',), '')[0]['kind'], 'snow')
+        self.assertEqual(catalogs.awdb_stations([st], ('SNTL',), '')[0]['kind'], 'snow')
         st['stationElements'] = [{'elementCode':'STO'}]
-        self.assertEqual(MAP.awdb_stations([st], ('SNTL',), ''), [])
+        self.assertEqual(catalogs.awdb_stations([st], ('SNTL',), ''), [])
 
     def test_groundwater_qc_and_record_period(self):
         """Historical wells are retained once; disturbed, missing and negative depths are excluded."""
@@ -59,7 +58,7 @@ class GaiaMapTests(unittest.TestCase):
         features = [feature('USGS-1',3,'2020-01-01'), feature('USGS-1',2,'2001-01-01'),
                     feature('USGS-2',4,'2020-01-01',['Pumping']), feature('USGS-3',None,'2020-01-01'),
                     feature('USGS-4',-1,'2020-01-01')]
-        result = MAP.groundwater_stations(features, {'pumping'})
+        result = catalogs.groundwater_stations(features, {'pumping'})
         self.assertEqual(len(result),1)
         self.assertEqual(dict(result[0]['rows'])['Accepted records (UTC)'], '2001-01-01 — 2020-01-01')
 
@@ -70,12 +69,12 @@ class GaiaMapTests(unittest.TestCase):
                 if address.endswith('/first'):
                     return json.dumps({'features':[1], 'links':[{'rel':'next','href':'next'}]})
                 return json.dumps({'features':[2], 'links':[]})
-        self.assertEqual(MAP.paged_features(Catalog(), 'https://example.org/first'), [1,2])
+        self.assertEqual(catalogs.paged_features(Catalog(), 'https://example.org/first'), [1,2])
         class Loop:
             def get(self, address):
                 return json.dumps({'features':[], 'links':[{'rel':'next','href':address}]})
         with self.assertRaisesRegex(ValueError,'pagination'):
-            MAP.paged_features(Loop(), 'https://example.org/first')
+            catalogs.paged_features(Loop(), 'https://example.org/first')
 
     def test_snapshot_integrity_and_html_safety(self):
         """Snapshot stations are unique and in-domain; HTML escapes catalog text and drops pilot regions."""
@@ -95,6 +94,7 @@ class GaiaMapTests(unittest.TestCase):
             root = Path(folder)
             (root / 'scripts').mkdir()
             (root / 'outputs').mkdir()
+            shutil.copytree(ROOT / 'src', root / 'src', ignore=shutil.ignore_patterns('__pycache__'))
             shutil.copytree(ROOT / 'scripts/maps', root / 'scripts/maps',
                             ignore=shutil.ignore_patterns('__pycache__'))
             script = root / 'scripts/build_gaia_map.py'

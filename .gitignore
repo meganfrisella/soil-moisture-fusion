@@ -43,3 +43,6 @@ MANIFEST
 /exploration/data/*
 !/exploration/data/README.md
 /data/nisar/
+
+# Verified public station catalog responses.
+/data/station_catalogs/

@@ -5,6 +5,7 @@ context, with varying source dates; they are not observation coverage masks.
 Imported by ``pixi run python scripts/build_gaia_map.py`` and the SME2 viewer.
 """
 
+from html import escape
 import json
 from pathlib import Path
 import re
@@ -37,7 +38,8 @@ def json_for_html(value):
 
 def render_template(template, manifest, app=None):
     """Apply shared web dependencies and safe data to a map template."""
-    tokens = dict(MAP_DATA=json_for_html(dict(manifest, map_config=browser_config())),
+    tokens = dict(MAP_TITLE=escape(manifest.get('title', 'Source stations and NISAR footprints')),
+                  MAP_DATA=json_for_html(dict(manifest, map_config=browser_config())),
                   LEAFLET_CSS=LEAFLET_CSS, LEAFLET_JS=LEAFLET_JS,
                   LEAFLET_CSS_INTEGRITY=LEAFLET_CSS_INTEGRITY,
                   LEAFLET_JS_INTEGRITY=LEAFLET_JS_INTEGRITY,

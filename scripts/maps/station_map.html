@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>GAIA · Source stations and NISAR footprints</title>
+  <title>__MAP_TITLE__</title>
   <link rel="stylesheet" href="__LEAFLET_CSS__"
         integrity="__LEAFLET_CSS_INTEGRITY__" crossorigin="">
   <style>
@@ -55,7 +55,7 @@
 <body>
   <main>
     <div class="map-wrap">
-      <div id="map" aria-label="GAIA domain, source stations and NISAR footprints"></div>
+      <div id="map" aria-label="Analysis domain, source stations and NISAR footprints"></div>
       <article id="hover-card" hidden aria-live="polite" aria-label="Feature metadata"></article>
       <div id="status" hidden role="status"></div>
     </div>
@@ -82,7 +82,7 @@
     const card = document.getElementById('hover-card');
     const status = document.getElementById('status');
     const kinds = {
-      seismic: {label:'Seismic · UW / CC', symbol:'▲', color:'#253e76', className:'seismic-symbol'},
+      seismic: {label:'Seismic · ' + (data.selection?.seismic_networks || ['UW', 'CC']).join(' / '), symbol:'▲', color:'#253e76', className:'seismic-symbol'},
       soil: {label:'Soil moisture', symbol:'●', color:'#147e78', className:'soil-symbol'},
       snow: {label:'SNOTEL · snow only', symbol:'◆', color:'#3185a4', className:'snow-symbol'},
       streamflow: {label:'USGS · stream gauges', symbol:'▼', color:'#186ca4', className:'stream-symbol'},
@@ -146,7 +146,7 @@
           ["Contributing granules", granules.length],
           ["Acquisition range (UTC)", granules[0].start.slice(0,10) + " — " + latest.start.slice(0,10)],
           ["Collections", collections.join("; ")]])}
-        <p>Convex hull in WGS84 longitude/latitude enclosing this track's catalog footprints that overlap GAIA, across frames. The hull fills gaps and can include areas outside acquisition coverage.</p>
+        <p>Convex hull in WGS84 longitude/latitude enclosing this track's catalog footprints that overlap the map region, across frames. The hull fills gaps and can include areas outside acquisition coverage.</p>
         <nav>${link(["Latest granule metadata", latest.metadata_url])}${link(["ASF track search", "https://search.asf.alaska.edu/#/?dataset=NISAR&sciProducts=SME2&path=" + track.track])}${link(["SME2 product metadata", "https://nisar-docs.asf.alaska.edu/sme2/"])}</nav></section>`;
     }
     // Ray casting in local lon/lat space, including polygon holes. This lets a
@@ -166,14 +166,14 @@
     const domain = {id:'domain', ...data.domain};
     document.getElementById('legend').innerHTML =
       legendRow(`<span class="swatch" style="border-color:${data.map_config.boundary_color}"></span>`,
-        'GAIA domain', 'data-boundary="domain" tabindex="0" role="button"') +
+        domain.label || 'GAIA domain', 'data-boundary="domain" tabindex="0" role="button"') +
       Object.entries(kinds).filter(([key])=>data.stations.some(s=>s.kind===key)).map(([key,k])=>legendRow(
         `<span style="color:${k.color};font-size:17px">${k.symbol}</span>`, k.label,
         `data-kind="${key}" tabindex="0" role="button"`)).join('') +
       trackNumbers.map(track => legendRow(`<span class="swatch track-swatch" style="border-color:${trackColor({track})}"></span>`,
         `NISAR ${String(track).padStart(3,'0')}`, `data-track="${track}" tabindex="0" role="button" aria-label="NISAR track ${String(track).padStart(3,'0')} metadata"`)).join('') +
-      (tracks.length ? `<p class="legend-note">NISAR track convex hulls · WGS84.<br>Enclose footprints overlapping GAIA across frames; hulls fill gaps and do not imply valid retrievals.<br>Acquisitions: ${escapeHtml(acquisitionDates[0])} — ${escapeHtml(acquisitionDates.at(-1))} UTC</p>` : '') +
-      `<p class="legend-note">Source stations; use in a model run is not confirmed. Wells include historical records.<br><br>Catalogs: ${escapeHtml(data.retrieved_at.slice(0,10))} UTC</p>`;
+      (tracks.length ? `<p class="legend-note">NISAR track convex hulls · WGS84.<br>Enclose footprints overlapping the map region across frames; hulls fill gaps and do not imply valid retrievals.<br>Acquisitions: ${escapeHtml(acquisitionDates[0])} — ${escapeHtml(acquisitionDates.at(-1))} UTC</p>` : '') +
+      `<p class="legend-note">Source stations; use in a model run is not confirmed. Includes historical/inactive sites; activity notes follow source catalogs.<br><br>Catalogs: ${escapeHtml(data.retrieved_at.slice(0,10))} UTC</p>`;
     if (!window.L) {
       status.hidden=false;
       status.textContent='The map library could not load. Connect to the internet and reload.';
@@ -241,13 +241,19 @@
         bindLegend(row, active => highlightTracks(active ? [number] : []),
           tracks.filter(t => t.track === number).map(t => ({key:'track:' + number, html:trackCard(t)})));
       });
-      const domainHtml = `<div class="eyebrow">Analysis extent</div><h2>GAIA domain</h2>${
-        rows([['Domain',domain.name],['Grid CRS',domain.crs],['Grid spacing',`${domain.resolution_m} m`],
-          ['Bounds (m)',domain.bounds_m.join(', ')],['GAIA revision',data.gaia.revision.slice(0,12)]])
-        }<p>Canonical analysis-grid boundary; model outputs can use coarser grids.</p>`;
+      const domainRows = domain.bounds_m
+        ? [['Domain',domain.name],['Grid CRS',domain.crs],['Grid spacing',`${domain.resolution_m} m`],
+           ['Bounds (m)',domain.bounds_m.join(', ')]]
+        : [['Domain',domain.name],['Coordinate system','WGS84 (EPSG:4326)'],
+           ['SW / NE',coords(domain.bounds_wgs84[1],domain.bounds_wgs84[0]) + ' / ' +
+             coords(domain.bounds_wgs84[3],domain.bounds_wgs84[2])]];
+      if (data.gaia?.revision) domainRows.push(['Source conventions', 'GAIA ' + data.gaia.revision.slice(0,12)]);
+      const domainHtml = `<div class="eyebrow">Analysis extent</div><h2>${escapeHtml(domain.label || 'GAIA domain')}</h2>${
+        rows(domainRows)}<p>${domain.bounds_m ? 'Canonical analysis-grid boundary; model outputs can use coarser grids.' :
+        'WGS84 viewing box; this is not a model grid or a drainage-basin boundary.'}</p>`;
       const domainLayer = L.geoJSON({type:'Feature',geometry:domain.geometry},{style:{
         color:data.map_config.boundary_color, weight:2, dashArray:data.map_config.boundary_dash,
-        opacity:.95, fill:false, className:'gaia-domain'}}).addTo(map);
+        opacity:.95, fill:false, className:'analysis-domain'}}).addTo(map);
       const domainRow = document.querySelector('[data-boundary="domain"]');
       const highlightDomain = active => {
         domainLayer.setStyle({weight:active ? 3.5 : 2});
@@ -272,8 +278,14 @@
         const marker=L.marker([station.latitude,station.longitude],{icon:L.divIcon({className:'marker',
           html:`<span class="${k.className}">${symbol}</span>`,iconSize:[size,size],iconAnchor:[size/2,size/2]}),
           alt:station.id,keyboard:true}).addTo(map);
+        const activity = station.activity || {status:'unknown', basis:'Not recorded in this catalog snapshot'};
+        const activityRows = [['Activity', activity.status === 'inactive' ? 'Inactive' : activity.status === 'active' ? 'Active in source catalog' : 'Unknown'],
+          ['Status basis', activity.basis]];
+        if (activity.as_of_utc) activityRows.push(['Status checked (UTC)', activity.as_of_utc.slice(0,10)]);
+        const activityNote = activity.status === 'inactive' ? '<p><strong>Inactive sensor in the source catalog.</strong> Historical observations may be available.</p>' :
+          (station.inactive_sensors || []).map(name => `<p><strong>Inactive ${escapeHtml(name.toLowerCase())} sensor.</strong> Historical observations may be available.</p>`).join('');
         const feature = {key:station.id, marker,
-          html:`<div class="eyebrow">${escapeHtml(k.label)}</div><h2>${escapeHtml(station.id)}</h2><p>${escapeHtml(station.name)}</p>${rows([['Coordinates',coords(station.latitude,station.longitude)],...station.rows])}<nav>${station.links.map(link).join('')}</nav>`};
+          html:`<div class="eyebrow">${escapeHtml(k.label)}</div><h2>${escapeHtml(station.id)}</h2><p>${escapeHtml(station.name)}</p>${activityNote}${rows([['Coordinates',coords(station.latitude,station.longitude)],...activityRows,...station.rows])}<nav>${station.links.map(link).join('')}</nav>`};
         stationGroups.get(station.kind).push(feature);
         const activate=event=>{
           highlightTracks([]);
@@ -294,7 +306,7 @@
         }, features);
       });
       map.on('mousemove', event => {
-        if (event.originalEvent?.target?.closest('.leaflet-marker-icon, .gaia-domain')) return;
+        if (event.originalEvent?.target?.closest('.leaflet-marker-icon, .analysis-domain')) return;
         const hits = tracks.filter(t => contains(t, [event.latlng.lng, event.latlng.lat]));
         highlightTracks(hits.map(t => t.track));
       });
