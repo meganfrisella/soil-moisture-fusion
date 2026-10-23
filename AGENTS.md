@@ -42,7 +42,7 @@ Run commands from the repository root:
 
 ## Data and reporting
 
-- Document every data source in data/README.md. Only add/update a table row when the data is downloaded, not when the download script is written.
+- Document data sources used by the Eastern Washington regridding experiment in `docs/eastern_washington_data.md`. Only add or update a table row when the data is downloaded, not when the download script is written.
 - Common scientific data formats include CSV, Parquet, netCDF, HDF5, Zarr
 - When reporting results, state the reference frame, units, and time window of every number. 
 

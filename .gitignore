@@ -32,17 +32,12 @@ MANIFEST
 
 .DS_Store
 
-# Original NISAR products downloaded locally.
-/data/nisar/
-
-# Native seismic and AgriMet observations downloaded locally.
-/exploration
-!/exploration/*.py
-!/exploration/README.md
-!/exploration/data/
-/exploration/data/*
-!/exploration/data/README.md
-/data/nisar/
-
-# Verified public station catalog responses.
-/data/station_catalogs/
+/data/*
+!/data/reference/
+/data/reference/*
+!/data/reference/eastern_washington/
+/data/reference/eastern_washington/*
+!/data/reference/eastern_washington/soil_moisture_stations.json
+/outputs/
+/to_delete/
+/exploration/

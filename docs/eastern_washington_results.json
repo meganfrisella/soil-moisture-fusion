@@ -1,0 +1,327 @@
+{
+  "schema": "eastern-washington-selected-results-v3",
+  "time_window_utc": {
+    "start": "2026-06-17T02:53:18+00:00",
+    "end": "2026-10-10T12:39:37+00:00"
+  },
+  "methods": [
+    "native_200m",
+    "nearest",
+    "bilinear"
+  ],
+  "candidates": [
+    "PMI",
+    "TSR",
+    "DSG"
+  ],
+  "units": "m3/m3",
+  "source_crs": "EPSG:6933",
+  "target_crs": "EPSG:5070",
+  "target_spacing_m": 90,
+  "station_crs": "EPSG:4326",
+  "included_stations": [
+    "2021:WA:SCAN",
+    "2198:WA:SCAN",
+    "599:WA:SNTL",
+    "707:WA:SNTL",
+    "USCRN.04136"
+  ],
+  "excluded_stations": [
+    "ODSW",
+    "824:WA:SNTL"
+  ],
+  "masking": {
+    "exact_zero": "missing",
+    "constant_raw_period_elapsed_hours_at_least": 12,
+    "constant_period_policy": "mask_all_members",
+    "sharp_jumps": "retained"
+  },
+  "metrics": {
+    "PMI": {
+      "pooled": {
+        "pairs": 62,
+        "methods": {
+          "native_200m": {
+            "rmse_m3_m3": 0.14143506357402064
+          },
+          "nearest": {
+            "rmse_m3_m3": 0.14774315450752107
+          },
+          "bilinear": {
+            "rmse_m3_m3": 0.14009329924575012
+          }
+        }
+      },
+      "stations": {
+        "2021:WA:SCAN": {
+          "pairs": 4,
+          "methods": {
+            "native_200m": {
+              "rmse_m3_m3": 0.11445637389464183
+            },
+            "nearest": {
+              "rmse_m3_m3": 0.20774780125963502
+            },
+            "bilinear": {
+              "rmse_m3_m3": 0.17816287016843638
+            }
+          }
+        },
+        "2198:WA:SCAN": {
+          "pairs": 21,
+          "methods": {
+            "native_200m": {
+              "rmse_m3_m3": 0.1366408144391671
+            },
+            "nearest": {
+              "rmse_m3_m3": 0.1366408144391671
+            },
+            "bilinear": {
+              "rmse_m3_m3": 0.13411696072140714
+            }
+          }
+        },
+        "599:WA:SNTL": {
+          "pairs": 4,
+          "methods": {
+            "native_200m": {
+              "rmse_m3_m3": 0.05859744788496486
+            },
+            "nearest": {
+              "rmse_m3_m3": 0.04061147840255465
+            },
+            "bilinear": {
+              "rmse_m3_m3": 0.05106991059492927
+            }
+          }
+        },
+        "707:WA:SNTL": {
+          "pairs": 11,
+          "methods": {
+            "native_200m": {
+              "rmse_m3_m3": 0.06704929920470146
+            },
+            "nearest": {
+              "rmse_m3_m3": 0.06704929920470146
+            },
+            "bilinear": {
+              "rmse_m3_m3": 0.0629747929478263
+            }
+          }
+        },
+        "USCRN.04136": {
+          "pairs": 22,
+          "methods": {
+            "native_200m": {
+              "rmse_m3_m3": 0.18247889639724102
+            },
+            "nearest": {
+              "rmse_m3_m3": 0.18247889639724102
+            },
+            "bilinear": {
+              "rmse_m3_m3": 0.1729504692719099
+            }
+          }
+        }
+      }
+    },
+    "TSR": {
+      "pooled": {
+        "pairs": 75,
+        "methods": {
+          "native_200m": {
+            "rmse_m3_m3": 0.06729526965185487
+          },
+          "nearest": {
+            "rmse_m3_m3": 0.06719265805132696
+          },
+          "bilinear": {
+            "rmse_m3_m3": 0.0663699419692084
+          }
+        }
+      },
+      "stations": {
+        "2021:WA:SCAN": {
+          "pairs": 6,
+          "methods": {
+            "native_200m": {
+              "rmse_m3_m3": 0.035564495519391844
+            },
+            "nearest": {
+              "rmse_m3_m3": 0.03126499644795802
+            },
+            "bilinear": {
+              "rmse_m3_m3": 0.032494582493736816
+            }
+          }
+        },
+        "2198:WA:SCAN": {
+          "pairs": 25,
+          "methods": {
+            "native_200m": {
+              "rmse_m3_m3": 0.04677178622291086
+            },
+            "nearest": {
+              "rmse_m3_m3": 0.04677178622291086
+            },
+            "bilinear": {
+              "rmse_m3_m3": 0.046481085996123536
+            }
+          }
+        },
+        "599:WA:SNTL": {
+          "pairs": 4,
+          "methods": {
+            "native_200m": {
+              "rmse_m3_m3": 0.15038783434252914
+            },
+            "nearest": {
+              "rmse_m3_m3": 0.1509594327057722
+            },
+            "bilinear": {
+              "rmse_m3_m3": 0.151173679826082
+            }
+          }
+        },
+        "707:WA:SNTL": {
+          "pairs": 14,
+          "methods": {
+            "native_200m": {
+              "rmse_m3_m3": 0.07883119252358535
+            },
+            "nearest": {
+              "rmse_m3_m3": 0.07883119252358535
+            },
+            "bilinear": {
+              "rmse_m3_m3": 0.07793426853065709
+            }
+          }
+        },
+        "USCRN.04136": {
+          "pairs": 26,
+          "methods": {
+            "native_200m": {
+              "rmse_m3_m3": 0.06198728139513239
+            },
+            "nearest": {
+              "rmse_m3_m3": 0.06198728139513239
+            },
+            "bilinear": {
+              "rmse_m3_m3": 0.05999313732971795
+            }
+          }
+        }
+      }
+    },
+    "DSG": {
+      "pooled": {
+        "pairs": 103,
+        "methods": {
+          "native_200m": {
+            "rmse_m3_m3": 0.19605903598065733
+          },
+          "nearest": {
+            "rmse_m3_m3": 0.19434807394009565
+          },
+          "bilinear": {
+            "rmse_m3_m3": 0.19868552261625072
+          }
+        }
+      },
+      "stations": {
+        "2021:WA:SCAN": {
+          "pairs": 10,
+          "methods": {
+            "native_200m": {
+              "rmse_m3_m3": 0.08788093011318703
+            },
+            "nearest": {
+              "rmse_m3_m3": 0.04360783666097442
+            },
+            "bilinear": {
+              "rmse_m3_m3": 0.05582121808074852
+            }
+          }
+        },
+        "2198:WA:SCAN": {
+          "pairs": 33,
+          "methods": {
+            "native_200m": {
+              "rmse_m3_m3": 0.06096285513677944
+            },
+            "nearest": {
+              "rmse_m3_m3": 0.06096285513677944
+            },
+            "bilinear": {
+              "rmse_m3_m3": 0.05615153524782974
+            }
+          }
+        },
+        "599:WA:SNTL": {
+          "pairs": 4,
+          "methods": {
+            "native_200m": {
+              "rmse_m3_m3": 0.36619210827778564
+            },
+            "nearest": {
+              "rmse_m3_m3": 0.36256023481364635
+            },
+            "bilinear": {
+              "rmse_m3_m3": 0.3637537791369938
+            }
+          }
+        },
+        "707:WA:SNTL": {
+          "pairs": 22,
+          "methods": {
+            "native_200m": {
+              "rmse_m3_m3": 0.33445384523625166
+            },
+            "nearest": {
+              "rmse_m3_m3": 0.33445384523625166
+            },
+            "bilinear": {
+              "rmse_m3_m3": 0.33170223935472243
+            }
+          }
+        },
+        "USCRN.04136": {
+          "pairs": 34,
+          "methods": {
+            "native_200m": {
+              "rmse_m3_m3": 0.14971198181204975
+            },
+            "nearest": {
+              "rmse_m3_m3": 0.14971198181204975
+            },
+            "bilinear": {
+              "rmse_m3_m3": 0.16985851154432682
+            }
+          }
+        }
+      }
+    }
+  },
+  "verified_stage_counts": {
+    "native": 207,
+    "nearest": 207,
+    "bilinear": 207
+  },
+  "provenance": {
+    "run_manifest_sha256": "d89e72ece5d2b18713f2a6e0810ed9a870d5282137aaafe0c7c34f8cd386a97f",
+    "preparation_sha256": "4c2a5a02bd6443c5e299ea89be673dac0c3e6630a9268ae44f69071099125fb0",
+    "prepared_csv_sha256": "16f5c0e98b51a97075e8a1330349280158befb670d72bcb6773e96112a8862dc",
+    "matches_sha256": "b8d6b539dc28871098b4993018e0249e6248a93ca53456d4b51181949f525df2",
+    "matching_summary_sha256": "d3d634b48974675a864d72c6e91bbed3b015d6941ebbce7ef71dfcbdfd18e438",
+    "code_sha256": "d3d9eb1fb88b99cdbf245ba28ae4da9992d32fb18d886addef12645cf9f9ebd5",
+    "station_predictions_sha256": "08d1241dba271050bd16d18a4220674037dbeb8d500c81b2f80abed2670f7989"
+  },
+  "local_metrics_sha256": "67867f4b53e7bef9df492775598a66254e68f2a5ccdc13a9754f145f5c55450c",
+  "figure_sha256": {
+    "odessa_bilinear.png": "2cbe19161d5743d2cfa26fb7cc1576038505e978ce491e70097dc00fe5e5c452",
+    "odessa_native.png": "0363a5c28434b14f45388f745829560242424e8b4fcce9c187d77e31bac87d49",
+    "odessa_native_epsg6933.png": "3a208618c6dfc07e0170cac4be8504e97c8c5db7725bb7f2295ac67e955ebde0",
+    "odessa_nearest.png": "04a94d638a9bdcfca4f8b13b5509be3f7921ae738a000191687e5a051c824421",
+    "shallow_sensors_validation.png": "bbebb8c2460b4cfcd6b500004d7a0278c1e821a290e8d08b49aa48cae5c3c2d4"
+  }
+}
