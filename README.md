@@ -10,7 +10,7 @@ Ultimately, we want to contribute methodology for multi-modal data fusion that g
 0. Literature review.
     - See [related_work.md](docs/related_work.md)
 1. Identify data sources, observation period, observation area and target spatial and temporal resolutions for the pilot.
-    - See data specs and stats at [data/README.md](data/README.md)
+    - See [Eastern Washington data dependencies](docs/eastern_washington_data.md) and [SME2 coverage and quality](docs/nisar_sme2.md).
     - Target spatial / temporal resolution: 90m / 1 day
 2. Produce gridded NISAR SME2 observations (surface soil-moisture estimate with uncertainty) for the pilot region at the target spatiotemporal resolution. 
     - Gridded data should be compatible with the soil-state model's data representation. 
@@ -34,21 +34,19 @@ Ultimately, we want to contribute methodology for multi-modal data fusion that g
 pixi shell
 ```
 
-## Data visualizations
+## Interactive Data Exploration
 
-### GAIA domain data sources map
+### Station and NISAR footprint maps
 
-[Interactive map](https://meganfrisella.github.io/soil-moisture-fusion/) of the GAIA domain, source stations, and NISAR footprints.
+| Western Washington (GAIA domain) | Eastern Washington |
+| --- | --- |
+| [![Western Washington station and NISAR footprint map](site/station_map.png)](https://meganfrisella.github.io/soil-moisture-fusion/) | [![Eastern Washington station and NISAR footprint map](site/eastern_washington/station_map.png)](https://meganfrisella.github.io/soil-moisture-fusion/eastern_washington/station_map.html) |
 
-[![Interactive map of the GAIA soil-state model data sources](outputs/station_map.png)](https://meganfrisella.github.io/soil-moisture-fusion/)
+### NISAR SME2 maps
 
-### GAIA domain NISAR SME2
-
-[Interactive map](https://meganfrisella.github.io/soil-moisture-fusion/gaia_domain/) of NISAR SME2 observations on the GAIA domain (Western Washington).
-
-### Eastern Washington NISAR SME2
-
-[Interactive map](https://meganfrisella.github.io/soil-moisture-fusion/eastern_washington/) of NISAR SME2 observations in Eastern Washington.
+| Western Washington (GAIA domain) | Eastern Washington |
+| --- | --- |
+| [![Western Washington DSG soil moisture map](docs/figures/nisar_sme2/western_washington_dsg_max_coverage.png)](https://meganfrisella.github.io/soil-moisture-fusion/gaia_domain/) | [![Eastern Washington DSG soil moisture map](docs/figures/nisar_sme2/eastern_washington_dsg_max_coverage.png)](https://meganfrisella.github.io/soil-moisture-fusion/eastern_washington/) |
 
 ## Misc
 

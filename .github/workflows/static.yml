@@ -33,19 +33,10 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup Pages
         uses: actions/configure-pages@v5
-      - name: Prepare maps
-        run: |
-          mkdir -p "$RUNNER_TEMP/station-map"
-          cp outputs/station_map.html "$RUNNER_TEMP/station-map/index.html"
-          for region in gaia_domain eastern_washington; do
-            mkdir -p "$RUNNER_TEMP/station-map/$region"
-            cp "outputs/$region/$region.html" "$RUNNER_TEMP/station-map/$region/index.html"
-            cp -R "outputs/$region/${region}_assets" "$RUNNER_TEMP/station-map/$region/"
-          done
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v4
         with:
-          path: ${{ runner.temp }}/station-map
+          path: site
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
