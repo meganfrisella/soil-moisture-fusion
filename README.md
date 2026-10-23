@@ -40,13 +40,13 @@ pixi shell
 
 | Western Washington (GAIA domain) | Eastern Washington |
 | --- | --- |
-| [![Western Washington station and NISAR footprint map](site/station_map.png)](https://meganfrisella.github.io/soil-moisture-fusion/) | [![Eastern Washington station and NISAR footprint map](site/eastern_washington/station_map.png)](https://meganfrisella.github.io/soil-moisture-fusion/eastern_washington/station_map.html) |
+| [![Western Washington station and NISAR footprint map](site/stations/western_washington/station_map.png)](https://meganfrisella.github.io/soil-moisture-fusion/stations/western_washington/) | [![Eastern Washington station and NISAR footprint map](site/stations/eastern_washington/station_map.png)](https://meganfrisella.github.io/soil-moisture-fusion/stations/eastern_washington/) |
 
 ### NISAR SME2 maps
 
 | Western Washington (GAIA domain) | Eastern Washington |
 | --- | --- |
-| [![Western Washington DSG soil moisture map](docs/figures/nisar_sme2/western_washington_dsg_max_coverage.png)](https://meganfrisella.github.io/soil-moisture-fusion/gaia_domain/) | [![Eastern Washington DSG soil moisture map](docs/figures/nisar_sme2/eastern_washington_dsg_max_coverage.png)](https://meganfrisella.github.io/soil-moisture-fusion/eastern_washington/) |
+| [![Western Washington DSG soil moisture map](docs/figures/nisar_sme2/western_washington_dsg_max_coverage.png)](https://meganfrisella.github.io/soil-moisture-fusion/sme2/western_washington/) | [![Eastern Washington DSG soil moisture map](docs/figures/nisar_sme2/eastern_washington_dsg_max_coverage.png)](https://meganfrisella.github.io/soil-moisture-fusion/sme2/eastern_washington/) |
 
 ## Misc
 

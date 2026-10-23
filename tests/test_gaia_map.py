@@ -23,7 +23,7 @@ from maps.preview import render_preview
 class GaiaMapTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.data = read_manifest(ROOT / 'site/index.html')
+        cls.data = read_manifest(ROOT / 'site/stations/western_washington/index.html')
 
     def test_projected_domain_and_clip(self):
         """Every densified boundary vertex lies on the projected grid, excluding bbox corners."""
