@@ -1,5 +1,6 @@
-"""Offline SME2 coverage statistics with synthetic native cells and candidate flags."""
+"""Check SME2 coverage statistics and selected source tuples on synthetic cells."""
 
+from copy import deepcopy
 import hashlib
 import json
 from pathlib import Path
@@ -19,7 +20,7 @@ from nisar import catalog, geometry, observations
 from test_data_downloads import catalog_item
 from test_nisar_visualization import write_granule, small_box
 import visualize_nisar_sme2 as visualization
-from nisar.selection import GranuleFrames
+from nisar.selection import GranuleFrames, read_combined_frame
 
 
 def frame(name, start, values, flags):
@@ -98,7 +99,9 @@ class StatisticsTests(unittest.TestCase):
             self.assertEqual(report['algorithms']['PMI']['mean_numeric_percent'], 75)
             self.assertEqual(report['algorithms']['PMI']['mean_recommended_percent'], 75)
             self.assertEqual(report['algorithms']['DSG']['mean_numeric_percent'], 0)
-            self.assertEqual({p.name for p in output.iterdir()}, {'sme2_statistics.json'})
+            self.assertEqual({p.name for p in output.iterdir()},
+                             {'sme2_statistics.json', 'sme2_field_audit.json',
+                              'sme2_diagnostics.json', '.sme2_qa.lock'})
 
     def test_candidate_flags_and_per_frame_means(self):
         """Weight frames equally despite different source counts; accept even flags and reject missing flags."""
@@ -176,6 +179,37 @@ class StatisticsTests(unittest.TestCase):
                 defaults = module.parser().parse_args(args[:6])
                 self.assertEqual(defaults.min_numeric_percent, 50)
                 self.assertEqual(defaults.nisar_combine_window, 10)
+
+
+class ProvenanceTests(unittest.TestCase):
+    def test_source_follows_selected_tuple_including_missing_moisture(self):
+        """Keep earliest companion-only tuples and replace them when later finite moisture wins."""
+        frames = {}
+        inputs = (([np.nan, .2, np.nan, np.nan], [.1, np.nan, .2, np.nan], [1, 0, 3, np.nan]),
+                  ([.4, .5, np.nan, np.nan], [.3, .4, .6, np.nan], [0, 1, 5, np.nan]))
+        for i, (moisture, sigma, flags) in enumerate(inputs):
+            frames[f"{i}.h5"] = {
+                "metadata": {"granule": f"{i}.h5", "zeroDopplerStartTime": f"2026-06-17T02:53:0{i}Z",
+                             "zeroDopplerEndTime": f"2026-06-17T02:53:1{i}Z"},
+                "data": {a: {"soilMoisture": np.array([moisture]),
+                             "soilMoistureUncertainty": np.array([sigma]),
+                             "retrievalQualityFlag": np.array([flags]), "available": True} for a in ALGORITHMS}}
+        def read(path, layout):
+            return deepcopy(frames[str(path)])
+        with patch("nisar.selection.read_frame", side_effect=read):
+            result = read_combined_frame(["0.h5", "1.h5"], {"mask": np.ones((1, 4), dtype=bool)},
+                                         source_indices={"0.h5": 8, "1.h5": 13})
+        for fields in result["data"].values():
+            np.testing.assert_array_equal(fields["source_index"], [[13, 8, 8, -1]])
+            np.testing.assert_array_equal(fields["soilMoisture"], [[.4, .2, np.nan, np.nan]])
+            np.testing.assert_array_equal(fields["soilMoistureUncertainty"], [[.3, np.nan, .2, np.nan]])
+            np.testing.assert_array_equal(fields["retrievalQualityFlag"], [[0, 0, 3, np.nan]])
+
+    def test_invalid_source_mapping_fails_before_reading(self):
+        """Reject duplicate, negative and overflowing source IDs instead of aliasing sources."""
+        for mapping in ({"a": 1, "b": 1}, {"a": -1, "b": 0}, {"a": 2**32, "b": 0}):
+            with self.subTest(mapping=mapping), self.assertRaises(ValueError):
+                read_combined_frame(["a", "b"], {}, source_indices=mapping)
 
 
 if __name__ == '__main__':

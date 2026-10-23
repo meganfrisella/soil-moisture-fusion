@@ -54,7 +54,7 @@ def group_paths(paths, minutes):
     return groups
 
 
-def read_combined_frame(paths, layout):
+def read_combined_frame(paths, layout, *, source_indices=None):
     """Mosaic ordered native EPSG:6933 cells, retaining source measurement tuples.
 
     Per algorithm/cell, the first finite moisture wins along with its reported
@@ -65,7 +65,17 @@ def read_combined_frame(paths, layout):
     union of cells supplying finite moisture across algorithms for each source.
     Each candidate's source_day records its finite moisture's UTC acquisition
     start as a Gregorian ordinal day (0 where moisture is missing).
+    source_index retains the selected tuple's source even where only a flag or
+    uncertainty is present (-1 if no field is finite). Optional source_indices
+    maps filenames to stable nonnegative int32 indices in a run-wide source
+    table; without it indices refer to this call's ordered paths.
     """
+    if source_indices is None:
+        source_indices = {Path(path).name: i for i, path in enumerate(paths)}
+    indices = [source_indices[Path(path).name] for path in paths]
+    if (len(set(indices)) != len(indices)
+            or any(type(i) is not int or not 0 <= i <= np.iinfo(np.int32).max for i in indices)):
+        raise ValueError('Source indices must be distinct nonnegative int32 integers')
     combined, sources = None, []
     fields = ('soilMoisture', 'soilMoistureUncertainty', 'retrievalQualityFlag')
     for path in paths:
@@ -76,6 +86,9 @@ def read_combined_frame(paths, layout):
             incoming = frame['data'][algorithm]
             finite = np.isfinite(incoming['soilMoisture'])
             incoming['source_day'] = np.where(finite, day, 0).astype(np.int32)
+            has_tuple = np.logical_or.reduce([np.isfinite(incoming[field]) for field in fields])
+            incoming['source_index'] = np.where(
+                has_tuple, source_indices[Path(path).name], -1).astype(np.int32)
             if combined is None:
                 supplied |= finite
                 continue
@@ -85,6 +98,7 @@ def read_combined_frame(paths, layout):
             take = take_numeric | empty
             for field in fields:
                 target[field][take] = incoming[field][take]
+            target['source_index'][take] = incoming['source_index'][take]
             target['source_day'][take_numeric] = day
             target['available'] |= incoming['available']
             supplied |= take_numeric
@@ -106,14 +120,21 @@ def read_combined_frame(paths, layout):
 
 
 def prepare_frames(view, granules, data_dir, minimum_percent, provenance, stats=None,
-                   combine_window=DEFAULT_COMBINE_WINDOW):
+                   combine_window=DEFAULT_COMBINE_WINDOW, *, qa_output_dir, expected_versions, command):
     """Verify/cache inputs once and return a reusable lazy frame sequence."""
     if not granules:
         raise ValueError('No overlapping PROVISIONAL granules were found')
-    paths = list(ensure_granules(granules, data_dir, stats))
-    with h5py.File(paths[0]) as f:
-        layout = window_layout(view, f)
-    frames = GranuleFrames(paths, layout, minimum_percent, combine_window)
+    from nisar.qa.reports import QASession
+    context = dict(bounds_wgs84=list(view.bounds), minimum_percent=minimum_percent,
+                   combine_window_minutes=combine_window,
+                   selection_rule='combine then strict coverage; earliest-finite tuple')
+    with QASession(qa_output_dir, granules, context, expected_versions, command) as qa:
+        paths = list(ensure_granules(granules, data_dir, stats, qa=qa))
+        audit_sha = qa.finish_fields()
+        with h5py.File(paths[0]) as f:
+            layout = window_layout(view, f)
+        frames = GranuleFrames(paths, layout, minimum_percent, combine_window)
+        diagnostic_sha = qa.diagnose(frames, layout)
     print(f'{len(frames)}/{frames.group_count} acquisition groups qualify from {len(paths)} granules; '
           f'{layout["mask"].sum():,} native cells '
           f'in the full box; >{minimum_percent:g}% numeric in at least one algorithm.', flush=True)
@@ -121,6 +142,8 @@ def prepare_frames(view, granules, data_dir, minimum_percent, provenance, stats=
         raise ValueError('No acquisition groups pass the numeric coverage threshold; no outputs written')
     retained = {path.name for record in frames.records for path in record['paths']}
     provenance = dict(provenance, min_numeric_percent=minimum_percent,
+                      qa=dict(output_dir=str(qa_output_dir), field_audit_sha256=audit_sha,
+                              diagnostics_sha256=diagnostic_sha),
                       nisar_combine_window_minutes=combine_window,
                       combine_rule='Same track; inclusive first-to-last UTC acquisition-start window; no chaining; zero disables combining',
                       overlap_rule='Earliest finite moisture per algorithm/cell, with its uncertainty and flag; filename breaks equal-start ties; if all moisture is missing, earliest nonempty tuple',

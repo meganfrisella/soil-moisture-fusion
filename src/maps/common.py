@@ -2,7 +2,7 @@
 
 Map geometries use WGS84 longitude/latitude degrees. Basemaps are cartographic
 context, with varying source dates; they are not observation coverage masks.
-Imported by ``pixi run python scripts/build_gaia_map.py`` and the SME2 viewer.
+Imported by ``pixi run python scripts/build_station_map.py`` and the SME2 viewer.
 """
 
 from html import escape

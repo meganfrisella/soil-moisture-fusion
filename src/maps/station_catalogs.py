@@ -1,6 +1,6 @@
 """Shared sensor-catalog discovery and caching for geographic and GAIA station maps.
 
-Run through scripts/build_station_map.py or scripts/build_gaia_map.py.
+Run through scripts/build_station_map.py.
 Station coordinates are WGS84 degrees; GAIA clipping uses projected grid metres.
 Inventory membership and catalog activity do not establish live observations.
 Groundwater QC follows the configured GAIA checkout; raw depth-to-water values

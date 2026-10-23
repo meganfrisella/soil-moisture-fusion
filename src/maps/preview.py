@@ -1,6 +1,6 @@
 """Capture the rendered station-map HTML with an isolated Chrome/Chromium profile.
 
-Used by ``pixi run python scripts/build_gaia_map.py --browser /path/to/chrome``.
+Used by ``pixi run python scripts/build_station_map.py --browser /path/to/chrome``.
 Leaflet and Esri tiles require internet. The PNG uses the HTML's Web Mercator
 display and WGS84 features; its metadata identifies the source HTML snapshot.
 """

@@ -76,7 +76,7 @@ def search_box(bounds, start_date=None, end_date=None, get_page=fetch_page):
                       'catalog_retrieved_at_utc': datetime.now(timezone.utc).isoformat()}
 
 
-def ensure_granules(granules, data_dir, stats=None):
+def ensure_granules(granules, data_dir, stats=None, *, qa=None):
     """Reuse verified files; authenticate lazily and cache missing originals."""
     data_dir = Path(data_dir)
     opener = None
@@ -89,5 +89,7 @@ def ensure_granules(granules, data_dir, stats=None):
             if opener is None:
                 opener = catalog.earthdata_opener()
             status = catalog.download_granule(granule, opener, data_dir, stats)
+        if qa is not None:
+            qa.record_file(path, granule)
         print(f'[{number}/{len(granules)}] {status}: {granule.name}', flush=True)
         yield path

@@ -6,6 +6,7 @@ import hashlib
 from http.client import IncompleteRead
 import importlib.util
 import io
+import json
 from pathlib import Path
 import tempfile
 import unittest
@@ -26,7 +27,7 @@ def load(name):
 NISAR = load("pull_nisar_sme2")
 from nisar import catalog
 from ingest import downloads as UTILS
-from utils import download_stats as STATS
+from ingest import download_stats as STATS
 
 
 class DateTests(unittest.TestCase):
@@ -81,7 +82,11 @@ class StorageTests(unittest.TestCase):
                 self.assertEqual(list(Path(directory).iterdir()), [])
 
 
-PAYLOAD = catalog.HDF5_SIGNATURE + b"synthetic bytes for transfer-integrity tests"
+from nisar_fixtures import write_valid_product
+
+_product_buffer = io.BytesIO()
+write_valid_product(_product_buffer)
+PAYLOAD = _product_buffer.getvalue()
 NAME = "NISAR_L3_PR_SME2_023_143_D_065_TEST"
 
 
@@ -185,7 +190,9 @@ class DownloadStatsTests(unittest.TestCase):
                 with patch('sys.stdout', new_callable=io.StringIO) as output, patch('sys.stderr', new_callable=io.StringIO):
                     self.assertEqual(module.main([]), 1)
                 self.assertIn('(9 bytes of response bodies)', output.getvalue())
-                self.assertEqual(list(output_dir.iterdir()), [])
+                self.assertEqual({p.name for p in output_dir.iterdir()},
+                                 {'.sme2_qa.lock', 'sme2_field_audit.json'})
+                self.assertEqual(json.loads((output_dir / 'sme2_field_audit.json').read_text())['payload']['state'], 'failed')
 
 
 class PullNisarTests(unittest.TestCase):

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Download original NISAR SME2 HDF5 products, including uncertainties and flags.
 
-Run from the repository root in the Pixi environment (standard library only):
+Run from the repository root in the Pixi environment:
     pixi run python scripts/pull_nisar_sme2.py --list-only
         Query the public catalog and list matching acquisitions without saving files.
     pixi run python scripts/pull_nisar_sme2.py
@@ -19,8 +19,16 @@ and uncertainties (m^3/m^3), integer flags, fill values, and embedded metadata.
 No quality filtering or flag reinterpretation is applied. All three source
 downloaders retain native formats and use the same UTC date-boundary helper.
 
-Only the primary HDF5 product is saved, without sidecars or converted exports.
-Downloads are checksum-verified before publication; identical existing files
+Only the primary HDF5 product is downloaded, without provider sidecars or converted exports.
+Mandatory R36 field/version QA writes sme2_field_audit.json in --output-dir;
+--cache-dir separates original storage from that report (otherwise both use
+--output-dir). Cached files receive the same checks without authentication.
+This file-only command explicitly leaves combined-dataset R37 QA unperformed.
+For frozen Eastern Washington inputs use prepare_nisar_sme2.py offline; box
+statistics/visualization commands perform both QA stages automatically.
+The approved version policy is regridding.inputs.VERSION_FIELDS; other releases
+stop for review rather than silently inheriting this experiment's assumptions.
+Downloads are checksum/field-verified before publication; identical existing files
 are skipped, and mismatched existing files are left untouched. Failed downloads
 are cleaned up; interrupted transfers restart on the next run. Credentials and
 authentication cookies are held in memory only.
@@ -48,12 +56,13 @@ from urllib.request import Request, urlopen
 
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "scripts"))
 sys.path.insert(0, str(ROOT / "src"))
 from ingest.downloads import utc_date_bounds
-from utils.download_stats import DownloadStats
+from ingest.download_stats import DownloadStats
 from nisar.catalog import (CMR_URL, TIMEOUT_SECONDS, parse_granule as parse_catalog_granule,
                            earthdata_opener, download_granule)
+from nisar.qa.reports import QASession
+from regridding.inputs import VERSION_FIELDS
 
 
 COLLECTION = "NISAR_L3_SME2_PROVISIONAL_V1"
@@ -137,6 +146,8 @@ def main(argv=None):
                         help="List catalog matches without authentication or file writes")
     parser.add_argument("--output-dir", type=Path, default=OUTPUT_DIR,
                         help="Directory for downloaded HDF5 products (default: data/nisar)")
+    parser.add_argument('--cache-dir', type=Path,
+                        help='Original-file cache; defaults to --output-dir for the existing CLI')
     args = parser.parse_args(argv)
     stats = DownloadStats()
     try:
@@ -150,13 +161,24 @@ def main(argv=None):
                   f"frame {granule.frame:03d}  {granule.name}", flush=True)
         if args.list_only:
             return 0
-        opener = earthdata_opener()
-        for index, granule in enumerate(granules, 1):
-            print(f"[{index}/{len(granules)}] {granule.start.date()}: verifying/downloading",
-                  flush=True)
-            status = download_granule(granule, opener, args.output_dir, stats)
-            print(f"  {status}: {granule.name}", flush=True)
-        print(f"Original HDF5 products stored in {args.output_dir}", flush=True)
+        cache_dir = args.cache_dir or args.output_dir
+        context = dict(collection=COLLECTION, track_frames=[list(pair) for pair in TRACK_FRAMES],
+                       start_date=START_DATE, end_date=END_DATE, scope='file-only')
+        command = ['pixi', 'run', 'python', 'scripts/pull_nisar_sme2.py',
+                   *(sys.argv[1:] if argv is None else argv)]
+        with QASession(args.output_dir, granules, context, VERSION_FIELDS, command) as qa:
+            opener = None
+            for index, granule in enumerate(granules, 1):
+                print(f"[{index}/{len(granules)}] {granule.start.date()}: verifying/downloading", flush=True)
+                if not (cache_dir / granule.name).exists() and opener is None:
+                    opener = earthdata_opener()
+                status = download_granule(granule, opener, cache_dir, stats)
+                qa.record_file(cache_dir / granule.name, granule)
+                print(f"  {status}: {granule.name}", flush=True)
+            qa.finish_fields()
+        print(f"Original HDF5 products stored in {cache_dir}", flush=True)
+        print('Dataset QA NOT RUN: this file-only command has no region/grouping context. '
+              'Run dataset preparation before analysis.', flush=True)
         return 0
     except HTTPError as error:
         # Do not log redirect URLs, which can contain temporary authentication tokens.

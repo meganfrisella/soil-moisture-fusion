@@ -2,7 +2,7 @@
 
 Footprints describe acquisition coverage, not valid retrievals or uncertainty.
 Keep original CMR polygon rings and holes.
-Used by ``pixi run python scripts/build_gaia_map.py --sme2-map PATH`` and by
+Used by ``pixi run python scripts/build_station_map.py --gaia-domain --sme2-map PATH`` and by
 ``pixi run python scripts/visualize_nisar_sme2.py --help`` when publishing HTML.
 """
 

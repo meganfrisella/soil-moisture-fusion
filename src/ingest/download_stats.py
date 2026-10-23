@@ -1,4 +1,4 @@
-"""Console transfer summaries used by the download and visualization workflows.
+"""Console transfer summaries used by download and visualization workflows.
 
 Imported helper; run via ``pixi run python scripts/pull_nisar_sme2.py``.
 """

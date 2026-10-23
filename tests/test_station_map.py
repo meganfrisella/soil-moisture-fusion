@@ -13,7 +13,9 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path[:0] = [str(ROOT / 'src'), str(ROOT / 'scripts')]
 from maps import station_map as maps
 from maps import station_catalogs as catalogs
+from maps.common import read_manifest
 from nisar.geometry import BoundingBox
+import build_station_map as workflow
 
 
 def snapshot():
@@ -90,19 +92,19 @@ class StationMapTests(unittest.TestCase):
             data = snapshot()
             args = ['--top-left', '48', '-121', '--bottom-right', '46', '-117',
                     '--title', 'Test region', '--output-dir', folder]
-            with patch.object(maps, 'refresh', return_value=copy.deepcopy(data)) as refresh, \
-                    patch.object(maps, 'render_preview') as preview:
-                self.assertEqual(maps.main(args, box_required=True), 0)
-                self.assertEqual(maps.main(args, box_required=True), 0)
+            with patch.object(workflow, 'refresh', return_value=copy.deepcopy(data)) as refresh, \
+                    patch.object(workflow, 'render_preview') as preview:
+                self.assertEqual(workflow.main(args), 0)
+                self.assertEqual(workflow.main(args), 0)
                 self.assertEqual(refresh.call_count, 1)
                 self.assertEqual(preview.call_count, 2)
-                saved = maps.read_manifest(Path(folder) / 'station_map.html')
+                saved = read_manifest(Path(folder) / 'station_map.html')
                 self.assertEqual(saved['domain']['bounds_wgs84'], [-121, 46, -117, 48])
                 self.assertEqual(saved['stations'], data['stations'])
                 wrong = args.copy()
                 wrong[1] = '49'
                 with self.assertRaises(SystemExit):
-                    maps.main(wrong, box_required=True)
+                    workflow.main(wrong)
                 self.assertEqual(refresh.call_count, 1)
 
     def test_generic_discharge_parser_and_empty_catalog(self):

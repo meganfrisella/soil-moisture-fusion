@@ -25,6 +25,7 @@ from nisar_visualization import topographic as topo
 import visualize_nisar_sme2 as workflow
 from nisar import selection as frames_workflow
 from test_data_downloads import catalog_item
+from regridding.inputs import VERSION_FIELDS
 
 
 def write_granule(path, columns=(0, 1, 2), timestamp='2026-01-01T01:00:00'):
@@ -41,8 +42,9 @@ def write_granule(path, columns=(0, 1, 2), timestamp='2026-01-01T01:00:00'):
         for key, value in dict(soilMoisture=np.full(shape, .2),
                                soilMoistureUncertainty=np.full(shape, -9999.),
                                retrievalQualityFlag=np.ones(shape)).items():
-            d = g.create_dataset('algorithmCandidates/PMI/' + key, data=value)
-            d.attrs['_FillValue'] = -9999
+            flag = key == 'retrievalQualityFlag'
+            d = g.create_dataset('algorithmCandidates/PMI/' + key, data=value.astype('i2' if flag else 'f4'))
+            d.attrs.update(_FillValue=-9999, units='1' if flag else 'meter^3/meter^3', grid_mapping='projection')
         identity = f.create_group('science/LSAR/identification')
         for key, value in dict(zeroDopplerStartTime=timestamp, zeroDopplerEndTime=timestamp,
                                trackNumber=1, frameNumber=2, absoluteOrbitNumber=3,
@@ -50,6 +52,10 @@ def write_granule(path, columns=(0, 1, 2), timestamp='2026-01-01T01:00:00'):
                                productSpecificationVersion='test', compositeReleaseId='test',
                                processingDateTime=timestamp).items():
             identity.create_dataset(key, data=value)
+        for key, value in VERSION_FIELDS.items():
+            if key in f:
+                del f[key]
+            f[key] = value
 
 
 def small_box():
@@ -215,7 +221,9 @@ class WindowTests(unittest.TestCase):
                 auth.assert_not_called()
             self.assertEqual({p.name for p in root.iterdir()},
                              {source.name, 'visuals'})
-            self.assertEqual({p.name for p in output_dir.iterdir()}, {'visual.gif', 'visual_topographic.png'})
+            self.assertEqual({p.name for p in output_dir.iterdir()},
+                             {'visual.gif', 'visual_topographic.png', '.sme2_qa.lock',
+                              'sme2_field_audit.json', 'sme2_diagnostics.json'})
             with Image.open(output_dir / 'visual_topographic.png') as image:
                 info = json.loads(image.info['Description'])
                 np.testing.assert_allclose(info['bounds_wgs84'], view.bounds, atol=1e-8)
@@ -283,7 +291,7 @@ class CombineTests(unittest.TestCase):
             frame = next(iter(frames_workflow.GranuleFrames(reversed(paths), layout)))
             pmi, tsr = frame['data']['PMI'], frame['data']['TSR']
             self.assertAlmostEqual(pmi['soilMoisture'][0, 0], .3)
-            self.assertEqual(pmi['soilMoistureUncertainty'][0, 0], .04)
+            self.assertEqual(pmi['soilMoistureUncertainty'][0, 0], float(np.float32(.04)))
             self.assertEqual(pmi['retrievalQualityFlag'][0, 0], 4)
             self.assertAlmostEqual(pmi['soilMoisture'][1, 1], .2)
             self.assertTrue(np.isnan(pmi['soilMoistureUncertainty'][1, 1]))

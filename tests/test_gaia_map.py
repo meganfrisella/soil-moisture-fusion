@@ -15,6 +15,7 @@ from pyproj import Transformer
 ROOT = Path(__file__).resolve().parents[1]
 sys.path[:0] = [str(ROOT / 'src'), str(ROOT / 'scripts')]
 from maps import station_map as MAP
+from maps.common import read_manifest
 from maps import station_catalogs as catalogs
 from maps.preview import render_preview
 
@@ -22,7 +23,7 @@ from maps.preview import render_preview
 class GaiaMapTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.data = MAP.read_manifest(ROOT / 'outputs/station_map.html')
+        cls.data = read_manifest(ROOT / 'outputs/station_map.html')
 
     def test_projected_domain_and_clip(self):
         """Every densified boundary vertex lies on the projected grid, excluding bbox corners."""
@@ -95,10 +96,8 @@ class GaiaMapTests(unittest.TestCase):
             (root / 'scripts').mkdir()
             (root / 'outputs').mkdir()
             shutil.copytree(ROOT / 'src', root / 'src', ignore=shutil.ignore_patterns('__pycache__'))
-            shutil.copytree(ROOT / 'scripts/maps', root / 'scripts/maps',
-                            ignore=shutil.ignore_patterns('__pycache__'))
-            script = root / 'scripts/build_gaia_map.py'
-            script.write_text((ROOT / 'scripts/build_gaia_map.py').read_text())
+            script = root / 'scripts/build_station_map.py'
+            script.write_text((ROOT / 'scripts/build_station_map.py').read_text())
             (root / 'outputs/station_map.html').write_text(MAP.render(self.data))
             fixture = root / 'fixture.png'
             Image.new('RGB', (1600, 1050), 'white').save(fixture)
@@ -108,13 +107,13 @@ class GaiaMapTests(unittest.TestCase):
                                f'shutil.copyfile({str(fixture)!r}, target)\n'
                                'print(\'<html data-map-ready="true"></html>\', flush=True)\ntime.sleep(30)\n')
             browser.chmod(0o700)
-            result = subprocess.run([sys.executable, str(script), '--browser', str(browser)],
+            result = subprocess.run([sys.executable, str(script), '--gaia-domain', '--browser', str(browser)],
                                     cwd=root, capture_output=True, text=True)
             self.assertEqual(result.returncode,0,result.stderr)
             html = (root / 'outputs/station_map.html').read_text()
             self.assertIn('GAIA domain',html)
             self.assertNotIn('__MAP_DATA__',html)
-            manifest = MAP.read_manifest(root / 'outputs/station_map.html')
+            manifest = read_manifest(root / 'outputs/station_map.html')
             self.assertNotIn('track_boxes', manifest)
             self.assertNotIn('pilots', manifest)
             hulls = manifest['track_hulls']
@@ -122,7 +121,7 @@ class GaiaMapTests(unittest.TestCase):
             self.assertTrue(all(len(hull['geometry']['coordinates']) == 1 for hull in hulls))
             output_dir = root / 'custom'
             result = subprocess.run(
-                [sys.executable, str(script), '--browser', str(browser), '--output-dir', str(output_dir),
+                [sys.executable, str(script), '--gaia-domain', '--browser', str(browser), '--output-dir', str(output_dir),
                  '--output', str(root / 'unused' / 'custom_map.html')],
                 cwd=root, capture_output=True, text=True)
             self.assertEqual(result.returncode, 0, result.stderr)

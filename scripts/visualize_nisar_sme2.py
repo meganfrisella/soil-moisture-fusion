@@ -38,12 +38,17 @@ must be downloaded to evaluate numeric coverage; excluded files remain cached.
     --formats gif png html     # All three outputs from the same qualifying set
 
 Outputs: <prefix>.gif, <prefix>_topographic.png, <prefix>.html as selected.
+Preparation also writes mandatory sme2_field_audit.json and sme2_diagnostics.json
+beside the output prefix, validating the approved R36 version/field contract and
+reporting R37 combined-native warnings before rendering. Changed QA input,
+configuration or code identities require a new output directory. Warnings do
+not change observations or eligibility; list-only performs no QA or file writes.
 --output-dir overrides the directory of --output-prefix, preserving its name;
 without it, --output-prefix defaults to outputs/nisar_sme2.
 HTML always uses an assets folder; keep it beside the HTML when moving files.
 Its dashed box, six-field dropdown, acquisition-group time control and candidate
 flag checkbox match the GIF semantics. No seventh combined-flag layer exists.
-The HTML carries contributing-track metadata for build_gaia_map.py --sme2-map.
+The HTML carries contributing-track metadata for build_station_map.py --sme2-map.
 All outputs carry provenance; HTML viewing needs internet for Leaflet and tiles.
 The GIF has PMI/TSR/DSG moisture and reported uncertainty in m³/m³. Subtitles show
 numeric and recommended percentages; recommended means finite displayed value
@@ -53,7 +58,7 @@ to 0–0.60 moisture and 0–0.08 uncertainty; configurable triangular overflow 
 match endpoint colors. There is no interpolation or uncertainty recalibration.
 
 The topographic PNG uses the same box with Esri source attribution; basemap dates
-vary. Workflow and rendering helpers reside in scripts/nisar_visualization/;
+vary. Rendering helpers reside in src/nisar_visualization/;
 shared ingestion, geometry and quality primitives reside in src/.
 """
 
@@ -78,7 +83,8 @@ from nisar.selection import (DEFAULT_COMBINE_WINDOW, DEFAULT_MIN_NUMERIC_PERCENT
 from maps.nisar_footprints import frame_tracks
 from nisar.quality import qualifies
 from nisar_visualization.style import DEFAULT_LIMITS
-from utils.download_stats import DownloadStats
+from ingest.download_stats import DownloadStats
+from regridding.inputs import VERSION_FIELDS
 
 
 def parser():
@@ -136,7 +142,10 @@ def main(argv=None):
             return 0
         layout, frames, provenance = prepare_frames(
             view, granules, args.data_dir, args.min_numeric_percent, provenance, stats,
-            combine_window=args.nisar_combine_window)
+            combine_window=args.nisar_combine_window, qa_output_dir=args.output_prefix.parent,
+            expected_versions=VERSION_FIELDS,
+            command=['pixi', 'run', 'python', 'scripts/visualize_nisar_sme2.py',
+                     *(sys.argv[1:] if argv is None else argv)])
         limits = (args.moisture_limits, args.uncertainty_limits)
         if 'gif' in args.formats:
             render_gif(layout, frames, Path(str(args.output_prefix) + '.gif'), args.title,

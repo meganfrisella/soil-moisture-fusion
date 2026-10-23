@@ -25,6 +25,7 @@
     .marker { background: transparent; border: none; }
     .seismic-symbol { display: block; color: #253e76; font-size: 23px; line-height: 23px; text-shadow: 0 0 2px white, 0 0 2px white; }
     .soil-symbol { display: block; width: 14px; height: 14px; margin: 5px; border-radius: 50%; background: #147e78; border: 2px solid white; box-shadow: 0 1px 4px #25443888; }
+    .soil-symbol.accent { background: #df721f; }
     .marker.active > span { transform: scale(1.3); filter: drop-shadow(0 0 3px #fff); }
     #hover-card { position: fixed; z-index: 800; background: #fff; border: 1px solid #c8d5cf; border-radius: 6px; box-shadow: 0 6px 22px #18383030; width: 310px; max-width: calc(100% - 24px); max-height: calc(100vh - 24px); overflow: auto; padding: 17px; font: 12px/1.45 system-ui, sans-serif; }
     .close-card { float: right; border: 0; background: transparent; font-size: 21px; line-height: 1; color: #536761; cursor: pointer; padding: 0 0 6px 6px; }
@@ -88,6 +89,7 @@
       streamflow: {label:'USGS · stream gauges', symbol:'▼', color:'#186ca4', className:'stream-symbol'},
       groundwater: {label:'USGS · groundwater wells', symbol:'●', color:'#826946', className:'well-symbol'}
     };
+    const accentSoilIds = new Set(data.accent_soil_ids || []);
     let cardKey = '';
     let cardPinned = false;
     function hideCard() { card.hidden = true; cardKey = ''; cardPinned = false; }
@@ -170,6 +172,8 @@
       Object.entries(kinds).filter(([key])=>data.stations.some(s=>s.kind===key)).map(([key,k])=>legendRow(
         `<span style="color:${k.color};font-size:17px">${k.symbol}</span>`, k.label,
         `data-kind="${key}" tabindex="0" role="button"`)).join('') +
+      (accentSoilIds.size ? legendRow('<span style="color:#df721f;font-size:17px">●</span>',
+        'Selected soil moisture', 'data-soil-accent tabindex="0" role="button"') : '') +
       trackNumbers.map(track => legendRow(`<span class="swatch track-swatch" style="border-color:${trackColor({track})}"></span>`,
         `NISAR ${String(track).padStart(3,'0')}`, `data-track="${track}" tabindex="0" role="button" aria-label="NISAR track ${String(track).padStart(3,'0')} metadata"`)).join('') +
       (tracks.length ? `<p class="legend-note">NISAR track convex hulls · WGS84.<br>Enclose footprints overlapping the map region across frames; hulls fill gaps and do not imply valid retrievals.<br>Acquisitions: ${escapeHtml(acquisitionDates[0])} — ${escapeHtml(acquisitionDates.at(-1))} UTC</p>` : '') +
@@ -275,8 +279,9 @@
       [...data.stations].sort((a,b)=>(a.kind==='groundwater'?0:1)-(b.kind==='groundwater'?0:1)).forEach(station=>{
         const k=kinds[station.kind], size=station.kind==='groundwater'?16:24;
         const symbol=['soil','groundwater'].includes(station.kind)?'':k.symbol;
+        const className=k.className + (station.kind==='soil' && accentSoilIds.has(station.id) ? ' accent' : '');
         const marker=L.marker([station.latitude,station.longitude],{icon:L.divIcon({className:'marker',
-          html:`<span class="${k.className}">${symbol}</span>`,iconSize:[size,size],iconAnchor:[size/2,size/2]}),
+          html:`<span class="${className}">${symbol}</span>`,iconSize:[size,size],iconAnchor:[size/2,size/2]}),
           alt:station.id,keyboard:true}).addTo(map);
         const activity = station.activity || {status:'unknown', basis:'Not recorded in this catalog snapshot'};
         const activityRows = [['Activity', activity.status === 'inactive' ? 'Inactive' : activity.status === 'active' ? 'Active in source catalog' : 'Unknown'],
@@ -305,6 +310,15 @@
           row.classList.toggle('active', active);
         }, features);
       });
+      const accentRow = document.querySelector('#legend [data-soil-accent]');
+      if (accentRow) {
+        const features = stationGroups.get('soil').filter(feature => accentSoilIds.has(feature.key));
+        bindLegend(accentRow, active => {
+          highlightTracks([]);
+          features.forEach(feature => highlightMarker(feature.marker, active));
+          accentRow.classList.toggle('active', active);
+        }, features);
+      }
       map.on('mousemove', event => {
         if (event.originalEvent?.target?.closest('.leaflet-marker-icon, .analysis-domain')) return;
         const hits = tracks.filter(t => contains(t, [event.latlng.lng, event.latlng.lat]));

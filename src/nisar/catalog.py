@@ -99,6 +99,8 @@ def verify_file(path, granule):
             digest.update(chunk)
     if digest.hexdigest() != granule.checksum:
         raise ValueError(f"Archive checksum mismatch: {path.name}")
+    from nisar.qa.metadata import inspect_fields
+    inspect_fields(path)
 
 
 def download_granule(granule, opener, output_dir, stats=None):

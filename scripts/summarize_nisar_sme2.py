@@ -32,6 +32,12 @@ gaps within each cell, then average equally over cells with at least two dates;
 report days and the number of eligible cells. No interval spans beyond a cell's
 first/last observation; quality flags do not filter this metric.
 The script prints its report and saves sme2_statistics.json in --output-dir.
+Mandatory R36 validation precedes decoding and R37 combined-native diagnostics
+precede reporting, writing sme2_field_audit.json and sme2_diagnostics.json in
+--output-dir. Existing matching QA is verified; changed inputs/configuration/code
+require a new output directory. The approved version policy is VERSION_FIELDS
+in regridding.inputs. Warnings preserve values and eligibility. This command
+queries the catalog; prepare_nisar_sme2.py is the offline frozen-input path.
 """
 
 import argparse
@@ -50,7 +56,8 @@ from nisar.geometry import BoundingBox
 from nisar.selection import (DEFAULT_COMBINE_WINDOW, DEFAULT_MIN_NUMERIC_PERCENT,
                              acquisition_time, prepare_frames, validate_combine_window)
 from nisar.quality import ALGORITHMS, cell_counts, qualifies
-from utils.download_stats import DownloadStats
+from ingest.download_stats import DownloadStats
+from regridding.inputs import VERSION_FIELDS
 
 
 def summarize_intervals(days, total):
@@ -154,7 +161,10 @@ def main(argv=None):
         granules, provenance = search_box(view.bounds)
         layout, frames, provenance = prepare_frames(
             view, granules, args.data_dir, args.min_numeric_percent, provenance, stats,
-            combine_window=args.nisar_combine_window)
+            combine_window=args.nisar_combine_window, qa_output_dir=args.output_dir,
+            expected_versions=VERSION_FIELDS,
+            command=['pixi', 'run', 'python', 'scripts/summarize_nisar_sme2.py',
+                     *(sys.argv[1:] if argv is None else argv)])
         summary = summarize_frames(frames, layout['mask'])
         report = dict(
             schema='nisar-sme2-statistics-v2',
