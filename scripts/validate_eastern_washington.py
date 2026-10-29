@@ -14,7 +14,8 @@ nearest, and bilinear stores in ``--run-dir``::
 The pipeline verifies or downloads missing station responses, audits coverage,
 applies the current zero/constant-period masks, plots selected shallow sensors,
 matches both acquisition time bounds within ±30 minutes, and scores native,
-nearest, and bilinear values on a common cohort. Prepared moisture and errors
+nearest, and bilinear values on a common cohort. It also overlays the prepared
+station series with every native SME2 acquisition, including unmatched dates. Prepared moisture and errors
 are m³/m³, station coordinates EPSG:4326, timestamps UTC. Add
 ``--with-precipitation --precip-cache-dir DIR`` to inspect large moisture jumps
 against local hourly gauges; that diagnostic does not change the validation.
@@ -34,6 +35,7 @@ from insitu.figures import run as plot_series
 from insitu.preparation import run as prepare_series
 from insitu.timestamp_workflow import run as match_timestamps
 from insitu.validation import STATIONS, run as validate_fields
+from insitu.native_overlay import plot as plot_native_overlay
 
 
 def main(argv=None):
@@ -69,6 +71,8 @@ def main(argv=None):
     match_timestamps(args.run_dir, preparation_dir, matches_dir, args.tolerance_minutes)
     result = validate_fields(args.run_dir, preparation_dir, matches_dir,
                              validation_dir, args.proj_cache_dir)
+    plot_native_overlay(preparation_dir, validation_dir, args.run_dir,
+                        output / "figures", args.inventory)
     if args.with_precipitation:
         from insitu.precipitation import run as inspect_precipitation
         inspect_precipitation(SimpleNamespace(
