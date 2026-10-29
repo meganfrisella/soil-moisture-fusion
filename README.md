@@ -48,6 +48,10 @@ pixi shell
 | --- | --- |
 | [![Western Washington DSG soil moisture map](docs/figures/nisar_sme2/western_washington_dsg_max_coverage.png)](https://meganfrisella.github.io/soil-moisture-fusion/sme2/western_washington/) | [![Eastern Washington DSG soil moisture map](docs/figures/nisar_sme2/eastern_washington_dsg_max_coverage.png)](https://meganfrisella.github.io/soil-moisture-fusion/sme2/eastern_washington/) |
 
+### Data provenance
+
+[![Eastern Washington data provenance graph](site/data_provenance/dependencies.png)](https://meganfrisella.github.io/soil-moisture-fusion/data_provenance/)
+
 ## Misc
 
 [interesting](https://gaia-hazlab.github.io/gwl-space-time-smooth/twin/assets/static_resolution.png) [visualizations](https://gaia-hazlab.github.io/gwl-space-time-smooth/twin/assets/observability.png) [of](https://gaia-hazlab.github.io/gwl-space-time-smooth/twin/assets/observing_system.png) [heterogeneous](https://gaia-hazlab.github.io/gwl-space-time-smooth/twin/assets/observing_spacetime.png) resolution

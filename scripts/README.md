@@ -10,7 +10,6 @@ Run from the repository root after `pixi install`. Every command-line script acc
 - [visualize_nisar_sme2.py](visualize_nisar_sme2.py): Render SME2 GIF, PNG or HTML source views for a selected region and format. It records the same mandatory source and combined-native QA checks before rendering.
 - [build_station_map.py](build_station_map.py): Build either a WGS84 bounding-box station map or the projected GAIA domain map with `--gaia-domain`. This general map workflow is separate from the selected station time-series validation.
 
+- [build_data_provenance.py](build_data_provenance.py): Validate tracked source evidence, build overview GraphML and render the provenance PNG and interactive HTML in one offline workflow.
 - [prepare_nisar_smap.py](prepare_nisar_smap.py): Verify/download missing SMAP originals, prepare their box cells and aggregate verified native NISAR fields to the same 9 km grid. Stores and records include complete file checksums.
 - [compare_soil_moisture.py](compare_soil_moisture.py): Verify existing prepared stores, compute NISAR–SMAP and NISAR algorithm-pair agreement under both screens, and write five figures plus compact results without additional Zarr stores.
-
-Selected methods, assumptions, final figures and exact result/provenance hashes are in [the experiment record](../docs/regridding/methods.md). See also the [comparison record](../docs/nisar_smap_comparison/methods.md).

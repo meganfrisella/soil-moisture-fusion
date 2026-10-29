@@ -15,6 +15,19 @@
 - **Takeaways:** Separate native retrieval error from gridding/depth-conversion error; track shared input errors
 - **Limitations:** Prelaunch agricultural demonstration; no local calibration or validation of every SME2 candidate; independence assumption needs testing
 
+## Das et al. (2019)
+
+[“The SMAP and Copernicus Sentinel 1A/B microwave active-passive high resolution surface soil moisture product”](https://doi.org/10.1016/j.rse.2019.111380), *Remote Sensing of Environment*, 233, 111380. [Publisher abstract](https://www.sciencedirect.com/science/article/pii/S0034425719303992); [NSIDC product provider: SPL2SMAP_S](https://nsidc.org/data/spl2smap_s/versions/3).
+
+- **Research question:** Recover finer-scale surface soil moisture by combining SMAP radiometry with Sentinel-1 radar after the SMAP radar failure
+- **Data sources:** SMAP L-band brightness temperatures, Sentinel-1A/B C-band backscatter, ancillary retrieval inputs, and soil-moisture calibration/validation sites
+- **Method:** Active–passive disaggregation of coarse SMAP brightness temperatures using Sentinel-1 backscatter, followed by soil-moisture retrieval on 3 km and 1 km EASE-Grid 2.0 grids
+- **Evaluation:** Comparisons with soil-moisture calibration/validation sites; publisher abstract and provider documentation reviewed
+- **Key result:** Demonstrates a distributed SMAP–Sentinel-1 surface-moisture product; finer spatial sampling comes with coverage and revisit constraints from overlapping satellite observations
+- **Code:** No implementation repository identified in reviewed material; derived data distributed by NSIDC as SPL2SMAP_S
+- **Takeaways:** Relevant active–passive downscaling precedent; shared SMAP observations imply potentially correlated errors with other SMAP-derived products. This is a different product and method from our audited SPL4SMGP v8, which assimilates radiometer observations into a land model without Sentinel-1
+- **Limitations:** Does not establish local acquisition availability or calibrated uncertainty for our Eastern Washington study. NSIDC distinguishes validated 3 km output from 1 km output that has not undergone product validation; grid spacing alone does not establish resolving power
+
 ## Pachepsky and Hill (2017)
 
 [“Scale and scaling in soils”](https://doi.org/10.1016/j.geoderma.2016.08.017), *Geoderma*, 287, 4–30. [Publisher abstract and section excerpts](https://www.sciencedirect.com/science/article/pii/S0016706116303640); [USDA publication record and summary](https://www.ars.usda.gov/research/publications/publication/?seqNo115=325208).
@@ -113,6 +126,19 @@
 - **Code:** Methodological review; no implementation repository identified
 - **Takeaways:** Choose justified predictors and scaling assumptions; distinguish inferred structure from resampling
 - **Limitations:** Mostly much coarser inputs; no established gain for SME2's 200 m native spacing → 90 m target spacing
+
+## Yang et al. (2024)
+
+[“Review of GNSS-R Technology for Soil Moisture Inversion”](https://doi.org/10.3390/rs16071193), *Remote Sensing*, 16(7), 1193. [Full text](https://mdpi-res.com/d_attachment/remotesensing/remotesensing-16-01193/article_deploy/remotesensing-16-01193.pdf).
+
+- **Research question:** How reflected GNSS signals can retrieve soil moisture across observation platforms, and what limits inversion accuracy and transferability
+- **Data sources:** Published ground-based, airborne, and spaceborne GNSS-R studies, including GNSS-IR and CYGNSS; no common validation dataset assembled for this review.
+- **Method:** Synthesis of GNSS-IR interference-signal retrievals, other reflectivity-based retrievals, single- and multi-antenna and open-loop processing, and empirical, physical, and machine-learning models
+- **Evaluation:** Comparison of methods and reported results from prior studies; no unified independent benchmark
+- **Key result:** GNSS-R offers frequent L-band observations, while vegetation, roughness, geometry, and reliance on ancillary data complicate soil-moisture retrieval
+- **Code:** No implementation repository identified in the review
+- **Takeaways:** Potential complementary surface-moisture observation; preserve reflection-footprint support and test local transfer before fusion with SME2
+- **Limitations:** Methodological review rather than a validated local product; proposed transfer learning and satellite downscaling do not establish 90 m spatial skill, daily coverage, or calibrated uncertainty
 
 ## Jones (1999)
 
