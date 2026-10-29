@@ -8,9 +8,9 @@ Ultimately, we want to contribute methodology for multi-modal data fusion that g
 ## Milestones
 
 0. Literature review.
-    - See [related_work.md](docs/related_work.md)
+    - See [related_work.md](docs/references/related_work.md)
 1. Identify data sources, observation period, observation area and target spatial and temporal resolutions for the pilot.
-    - See [Eastern Washington data dependencies](docs/eastern_washington_data.md) and [SME2 coverage and quality](docs/nisar_sme2.md).
+    - See [Eastern Washington data dependencies](docs/regridding/data.md) and [SME2 coverage and quality](docs/nisar/sme2.md).
     - Target spatial / temporal resolution: 90m / 1 day
 2. Produce gridded NISAR SME2 observations (surface soil-moisture estimate with uncertainty) for the pilot region at the target spatiotemporal resolution. 
     - Gridded data should be compatible with the soil-state model's data representation. 

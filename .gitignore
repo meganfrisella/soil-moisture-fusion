@@ -32,12 +32,7 @@ MANIFEST
 
 .DS_Store
 
-/data/*
-!/data/reference/
-/data/reference/*
-!/data/reference/eastern_washington/
-/data/reference/eastern_washington/*
-!/data/reference/eastern_washington/soil_moisture_stations.json
+/data/
 /outputs/
 /to_delete/
 /exploration/

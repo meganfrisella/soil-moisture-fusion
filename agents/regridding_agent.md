@@ -1,11 +1,9 @@
 # Regridding agent instructions
 
-Historical execution instructions for the broader experiment. The current retained methods and operative Axx/Rxx decisions are recorded in [the concise regridding document](../docs/eastern_washington_regridding.md); regression and coarse experiments now reside in `exploration/` or local archives.
-
 ## Scope and sources
 
-- Follow the repository [AGENTS.md](../AGENTS.md) and the [Eastern Washington experiment specification](../docs/eastern_washington_regridding.md). This file governs execution and decision handling; scientific requirements, assumptions, and unresolved R-items remain in the experiment specification.
-- Consult [mlgeo-book](../../mlgeo-book/), especially [the resampling notebook](../../mlgeo-book/book/Chapter2-DataManipulation/2.6_resampling.ipynb); [gwl-space-time-smooth](../../gwl-space-time-smooth/), especially [GAIA's implementation](../../gwl-space-time-smooth/src/models/downscale.py); [related work](../docs/related_work.md); and relevant internet searches when resolving choices.
+- Follow the repository [AGENTS.md](../AGENTS.md) and the [Eastern Washington experiment specification](../docs/regridding/methods.md). This file governs execution and decision handling; scientific requirements, assumptions, and unresolved R-items remain in the experiment specification.
+- Consult [mlgeo-book](../../mlgeo-book), especially [the resampling notebook](../../mlgeo-book/book/Chapter2-DataManipulation/2.6_resampling.ipynb); [gwl-space-time-smooth](../../gwl-space-time-smooth), especially [GAIA's implementation](../../gwl-space-time-smooth/src/models/downscale.py); [related work](../docs/references/related_work.md); and relevant internet searches when resolving choices.
 
 ## Software design
 

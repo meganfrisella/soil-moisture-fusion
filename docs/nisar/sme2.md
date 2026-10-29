@@ -14,12 +14,12 @@ Filter is **`min-numeric-percent` (%)** and combine window is **`nisar-combine-w
 | Odessa | `47.405850 -118.753749` | `47.260609 -118.622651` | 80 | 10 | 160.000 | 4,096 | 34 / 25 / 16 | 2026-06-19–2026-10-10 | 63.53 / 75.44 / 99.27 | 61.37 / 75.26 / 93.01 | 8.56 / 8.09 / 7.53 |
 | Puyallup | `47.254429 -122.318983` | `47.109597 -122.187885` | 80 | 10 | 160.000 | 4,096 | 36 / 36 / 36 | 2025-11-10–2026-10-07 | 63.40 / 70.91 / 82.05 | 6.30 / 5.29 / 7.37 | 10.96 / 10.23 / 9.46 |
 | Snoqualmie | `47.727191 -122.024896` | `47.581070 -121.893798` | 80 | 10 | 160.000 | 4,160 | 35 / 25 / 17 | 2026-06-21–2026-10-07 | 62.81 / 75.27 / 98.32 | 2.26 / 1.96 / 3.41 | 7.20 / 7.00 / 6.75 |
-| [Western Washington (full GAIA domain)](../site/sme2/western_washington/index.html) | `48.321364 -122.997713` | `46.496248 -120.607770` | 10 | 10 | 36,599.751 | 915,482 | 88 / 53 / 45 | 2025-11-10–2026-10-07 | 41.03 / 47.61 / 59.11 | 1.52 / 1.52 / 2.12 | 8.16 / 7.64 / 7.28 |
-| [Eastern Washington](../site/sme2/eastern_washington/index.html) | `48.076483 -121.241744` | `46.057370 -117.072163` | 10 | 10 | 71,091.291 | 1,777,724 | 138 / 69 / 44 | 2026-06-17–2026-10-10 | 25.02 / 29.75 / 38.97 | 16.38 / 20.79 / 26.24 | 5.96 / 5.72 / 5.44 |
+| [Western Washington (full GAIA domain)](../../site/sme2/western_washington/index.html) | `48.321364 -122.997713` | `46.496248 -120.607770` | 10 | 10 | 36,599.751 | 915,482 | 88 / 53 / 45 | 2025-11-10–2026-10-07 | 41.03 / 47.61 / 59.11 | 1.52 / 1.52 / 2.12 | 8.16 / 7.64 / 7.28 |
+| [Eastern Washington](../../site/sme2/eastern_washington/index.html) | `48.076483 -121.241744` | `46.057370 -117.072163` | 10 | 10 | 71,091.291 | 1,777,724 | 138 / 69 / 44 | 2026-06-17–2026-10-10 | 25.02 / 29.75 / 38.97 | 16.38 / 20.79 / 26.24 | 5.96 / 5.72 / 5.44 |
 
 **Mean per-cell interval:** for each candidate and native cell, collect distinct source acquisition-start UTC dates with any finite moisture, regardless of flags, from selected frames. Compute `(last date − first date) / (number of dates − 1)`, then average equally across cells with at least two dates. Same-day passes count once; source dates survive combining. Cells with fewer than two dates are excluded (`temporal_interval_cells` in each local region summary records the denominator); no eligible cells gives `null`. Gaps outside each cell’s first/last observation are excluded. These are observed mean intervals within the listed spans, not guaranteed revisit periods.
 
-The GAIA box encloses its [EPSG:5070 boundary](../../gwl-space-time-smooth/src/config/domain.py), rounded outward; it includes some area outside that boundary.
+The GAIA box encloses its [EPSG:5070 boundary](../../../gwl-space-time-smooth/src/config/domain.py), rounded outward; it includes some area outside that boundary.
 
 ## SME2 quality flags
 
@@ -36,10 +36,10 @@ Paths below are relative to `/science/LSAR/SME2/grids/`: **combined** = `retriev
 | 6 | 64 | na | VV backscatter anomaly |
 | 7 | 128 | na | VH backscatter anomaly |
 
-Combined definitions follow the downloaded PROVISIONAL HDF5 `description` attribute (product specification version 1.0.2), which differs from the older [Rev C specification](../data/nisar_metadata/spec.pdf#page=37). Candidate bit labels follow that specification (pp. 23, 25, 29–30); candidate metadata describes 0 as clear and nonzero as an anomaly. Bits 1–2 are status checks, not the combined flag's algorithm-use bits.
+Combined definitions follow the downloaded PROVISIONAL HDF5 `description` attribute (product specification version 1.0.2), which differs from the older [Rev C specification](../../metadata/nisar/spec.pdf#page=37). Candidate bit labels follow that specification (pp. 23, 25, 29–30); candidate metadata describes 0 as clear and nonzero as an anomaly. Bits 1–2 are status checks, not the combined flag's algorithm-use bits.
 
 `-9999` is fill, not a bit pattern. Current maps outline valid odd **candidate** flags; coverage counts finite moisture with a valid even candidate flag as recommended. Other candidate bits may still be set. Combined flags are not used in these maps or coverage counts.
 
 ## Eastern Washington regridding
 
-Native, nearest-neighbor, bilinear, station-preparation and validation products are generated locally in `outputs/eastern_washington/` and are not committed. The retained [method and result record](eastern_washington_regridding.md), [exact compact scores and provenance](eastern_washington_results.json), and selected figures are under `docs/`. The former five-method regression comparisons are historical exploration, not the selected-method validation cohort.
+Native, nearest-neighbor, bilinear, station-preparation and validation products are generated locally in `outputs/eastern_washington/` and are not committed. The retained [method and result record](../regridding/methods.md) and selected figures are under `docs/`; [exact compact scores and provenance](../../metadata/regridding/results.json) are under `metadata/`. The former five-method regression comparisons are historical exploration, not the selected-method validation cohort.

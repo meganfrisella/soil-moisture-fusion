@@ -5,7 +5,7 @@ Run from the repository root after ``pixi install`` and completing native,
 nearest, and bilinear stores in ``--run-dir``::
 
     pixi run python scripts/validate_eastern_washington.py \
-      --inventory data/reference/eastern_washington/soil_moisture_stations.json \
+      --inventory metadata/regridding/soil_moisture_stations.json \
       --cache-dir data/insitu_coverage/2026-10-19 \
       --run-dir outputs/eastern_washington/regridding_washington \
       --proj-cache-dir data/proj \

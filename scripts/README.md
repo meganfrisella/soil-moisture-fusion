@@ -10,4 +10,4 @@ Run from the repository root after `pixi install`. Every command-line script acc
 - [visualize_nisar_sme2.py](visualize_nisar_sme2.py): Render SME2 GIF, PNG or HTML source views for a selected region and format. It records the same mandatory source and combined-native QA checks before rendering.
 - [build_station_map.py](build_station_map.py): Build either a WGS84 bounding-box station map or the projected GAIA domain map with `--gaia-domain`. This general map workflow is separate from the selected station time-series validation.
 
-Selected methods, assumptions, final figures and exact result/provenance hashes are in [the experiment record](../docs/eastern_washington_regridding.md).
+Selected methods, assumptions, final figures and exact result/provenance hashes are in [the experiment record](../docs/regridding/methods.md).

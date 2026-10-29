@@ -3,7 +3,7 @@
 ## Scope & Design Decisions
 
 - For questions about GAIA implementation, use the local checkout at `../gwl-space-time-smooth` as the primary source.
-- Consult `docs/related_work.md` when evaluating or proposing scientific methods, computational approaches, and technical design choices.
+- Consult `docs/references/related_work.md` when evaluating or proposing scientific methods, computational approaches, and technical design choices.
 - Produce only deliverables specifically requested by the user. Do not add unrequested previews, exports, or auxiliary products.
 - Before implementation, ask the user to resolve any major design decisions left unspecified in the request. Wait for their answer before implementing work that depends on those decisions.
 - Ask the user for approval before adding content to the top-level `README.md`.
@@ -42,7 +42,7 @@ Run commands from the repository root:
 
 ## Data and reporting
 
-- Document data sources used by the Eastern Washington regridding experiment in `docs/eastern_washington_data.md`. Only add or update a table row when the data is downloaded, not when the download script is written.
+- Keep downloaded data under ignored `data/`. Retained reference metadata belongs in tracked `metadata/`. JSON used directly by published pages belongs in `site/`.
 - Common scientific data formats include CSV, Parquet, netCDF, HDF5, Zarr
 - When reporting results, state the reference frame, units, and time window of every number. 
 

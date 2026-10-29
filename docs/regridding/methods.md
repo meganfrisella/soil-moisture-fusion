@@ -8,7 +8,7 @@ The pipeline is implemented in `src/nisar/qa`, `src/regridding` and `src/insitu`
 
 ## Inputs and support
 
-The [data-dependency table](eastern_washington_data.md) identifies the frozen local inputs and their source workflows.
+The [data-dependency table](data.md) identifies the frozen local inputs and their source workflows.
 
 The input selection is the checksum-pinned local SME2 PROVISIONAL archive in `data/nisar`, described by `outputs/eastern_washington/sme2_statistics.json` (selection SHA-256 `9db85b322d52e7e10000f607f41b08a16d609603044d8989f2666890db6c97b6`). File checksums, required version fields and combined-native diagnostics are verified before use. Finite non-fill moisture is eligible regardless of recommendation flags; each candidate retains its flag, reported uncertainty and source identity. Reported finite nonnegative uncertainty is treated as a **conditional retrieval-error standard deviation**.
 
@@ -62,11 +62,11 @@ All **207 candidate/acquisition tasks per stage** completed in the local native,
 
 The target lattice has 8,784,001 cells intersecting the domain and 8,776,702 eligible centers per acquisition. The Odessa visualizations cover **2026-09-16 03:01:34–03:02:43 UTC**. Of 20,106 intersecting target cells in that view, 19,960 nearest and 19,805 bilinear cells have valid moisture for each candidate. Bilinear's larger missing margin follows its four-neighbor rule. The native, nearest and bilinear figures were inspected at their recorded SHA-256 digests:
 
-- [Original EPSG:6933 cells](figures/eastern_washington_regrid/odessa_native_epsg6933.png), [native display](figures/eastern_washington_regrid/odessa_native.png), [nearest](figures/eastern_washington_regrid/odessa_nearest.png), [bilinear](figures/eastern_washington_regrid/odessa_bilinear.png).
+- [Original EPSG:6933 cells](../figures/eastern_washington_regrid/odessa_native_epsg6933.png), [native display](../figures/eastern_washington_regrid/odessa_native.png), [nearest](../figures/eastern_washington_regrid/odessa_nearest.png), [bilinear](../figures/eastern_washington_regrid/odessa_bilinear.png).
 
 ### Shallow-station validation
 
-Station coverage, provider decoding and missingness analysis are retained in `src/insitu`. Validation sensors were selected based on study-window availability, shallow record availability, and data quality. The five selected validation sensors are Lind #1, Cook Farm Field D, Lost Horse, Quartz Peak and Spokane 17 SSW. Nominal depths are 5 or 5.08 cm. The [five-sensor time series](figures/eastern_washington_regrid/shallow_sensors_validation.png) shows the prepared values and gaps across the full study window.
+Station coverage, provider decoding and missingness analysis are retained in `src/insitu`. Validation sensors were selected based on study-window availability, shallow record availability, and data quality. The five selected validation sensors are Lind #1, Cook Farm Field D, Lost Horse, Quartz Peak and Spokane 17 SSW. Nominal depths are 5 or 5.08 cm. The [five-sensor time series](../figures/eastern_washington_regrid/shallow_sensors_validation.png) shows the prepared values and gaps across the full study window.
 
 The preparation keeps the first source-order duplicate, inserts missing hourly rows with `NaN` moisture without interpolation, retains provider flags and raw values, converts documented percent to m³/m³, and masks exact zeros. Its standard rule also masks every observation, including the first, in an exact constant raw-value run spanning at least 12 elapsed hours. Abrupt jumps (>= 0.05 m³/m³) remain in the prepared values; a separate local precipitation report offers context, not a causal or exclusion rule.
 
@@ -95,7 +95,7 @@ Every cell is ordered **PMI / TSR / DSG**. The first row gives common-pair count
 | Nearest 90 m | 0.2077 / 0.0313 / 0.0436 | 0.1366 / 0.0468 / 0.0610 | 0.0406 / 0.1510 / 0.3626 | 0.0670 / 0.0788 / 0.3345 | 0.1825 / 0.0620 / 0.1497 |
 | Bilinear 90 m | 0.1782 / 0.0325 / 0.0558 | 0.1341 / 0.0465 / 0.0562 | 0.0511 / 0.1512 / 0.3638 | 0.0630 / 0.0779 / 0.3317 | 0.1730 / 0.0600 / 0.1699 |
 
-These descriptive scores establish agreement on the matched shallow sensors; they do not establish domain-wide accuracy, uncertainty calibration or fine-scale detail recovery. The [compact result and provenance record](eastern_washington_results.json) gives exact pooled and station scores, local input hashes, verified stage counts and committed figure hashes, without downloaded observations or gridded fields.
+These descriptive scores establish agreement on the matched shallow sensors; they do not establish domain-wide accuracy, uncertainty calibration or fine-scale detail recovery. The [compact result and provenance record](../../metadata/regridding/results.json) gives exact pooled and station scores, local input hashes, verified stage counts and committed figure hashes, without downloaded observations or gridded fields.
 
 ## Reproduction
 
@@ -116,5 +116,5 @@ pixi run python scripts/regrid_eastern_washington.py --stage bilinear --resume -
 
 pixi run python scripts/regrid_eastern_washington.py --stage bilinear --inspect-bilinear-figure ACTUAL_BILINEAR_SHA256 --output-dir outputs/eastern_washington/regridding_replay
 
-pixi run python scripts/validate_eastern_washington.py --inventory data/reference/eastern_washington/soil_moisture_stations.json --cache-dir data/insitu_coverage/2026-10-19 --run-dir outputs/eastern_washington/regridding_replay --proj-cache-dir data/proj --output-dir outputs/eastern_washington/insitu_validation/replay
+pixi run python scripts/validate_eastern_washington.py --inventory metadata/regridding/soil_moisture_stations.json --cache-dir data/insitu_coverage/2026-10-19 --run-dir outputs/eastern_washington/regridding_replay --proj-cache-dir data/proj --output-dir outputs/eastern_washington/insitu_validation/replay
 ```

@@ -204,7 +204,7 @@
   - Current reduced update: snapshot water-table-head anomaly; storage-based cycling filter remains a target
 - **Evaluation:** Native-support comparisons; uncertainty reduction, averaging kernels, observability; independent tests distinguished from model cross-checks and synthetic demonstrations
 - **Key result:** Framework for heterogeneous assimilation; output spacing and variance reduction insufficient to establish resolving power
-- **Code:** [gwl-space-time-smooth](https://github.com/gaia-hazlab/gwl-space-time-smooth); local [assimilation](../../gwl-space-time-smooth/docs/twin/04-assimilation.qmd) and [evaluation](../../gwl-space-time-smooth/docs/twin/05-state-evaluation.qmd) chapters checked
+- **Code:** [gwl-space-time-smooth](https://github.com/gaia-hazlab/gwl-space-time-smooth); local [assimilation](../../../gwl-space-time-smooth/docs/twin/04-assimilation.qmd) and [evaluation](../../../gwl-space-time-smooth/docs/twin/05-state-evaluation.qmd) chapters checked
 - **Takeaways:** Destination for SME2 constraints in the Pacific Northwest; propagate gridding and surface-to-root-zone uncertainty
 - **Limitations:** Provisional covariance/error assumptions; planned versus implemented components; no independent proof of 90 m daily skill
 
